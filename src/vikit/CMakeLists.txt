@@ -1,0 +1,3 @@
+add_subdirectory(vikit_cameras)
+add_subdirectory(vikit_common)
+add_subdirectory(vikit_solver)
