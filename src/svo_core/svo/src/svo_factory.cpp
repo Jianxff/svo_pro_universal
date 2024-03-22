@@ -107,7 +107,7 @@ std::shared_ptr<ImuHandler> makeIMU(
 BaseOptions loadBaseOptions(const std::string& filepath) {
     if(filepath.size() == 0) return BaseOptions();
 
-    YAML::Node node = YAML::LoadFile(filepath)["base"];
+    YAML::Node node = YAML::LoadFile(filepath);
     BaseOptions o;
     o.max_n_kfs = node["max_n_kfs"].as<int>(5);
     o.use_imu = node["use_imu"].as<bool>(false);
@@ -158,7 +158,7 @@ BaseOptions loadBaseOptions(const std::string& filepath) {
 IMUHandlerOptions loadIMUHandlerOptions(const std::string& filepath) {
     if(filepath.size() == 0) return IMUHandlerOptions();
 
-    YAML::Node node = YAML::LoadFile(filepath)["imu_handler"];
+    YAML::Node node = YAML::LoadFile(filepath);
     IMUHandlerOptions o;
 
     o.temporal_stationary_check = node["temporal_stationary_check"].as<bool>(false);
@@ -172,7 +172,7 @@ IMUHandlerOptions loadIMUHandlerOptions(const std::string& filepath) {
 InitializationOptions loadInitializationOptions(const std::string& filepath) {
     if(filepath.size() == 0) return InitializationOptions();
 
-    YAML::Node node = YAML::LoadFile(filepath)["initialization"];
+    YAML::Node node = YAML::LoadFile(filepath);
     InitializationOptions o;
 
     o.init_min_features = node["init_min_features"].as<int>(100);
@@ -200,7 +200,7 @@ InitializationOptions loadInitializationOptions(const std::string& filepath) {
 ReprojectorOptions loadReprojectorOptions(const std::string& filepath) {
     if(filepath.size() == 0) return ReprojectorOptions();
 
-    YAML::Node node = YAML::LoadFile(filepath)["reprojector"];
+    YAML::Node node = YAML::LoadFile(filepath);
     ReprojectorOptions o;
 
     o.max_n_kfs = node["reprojector_max_n_kfs"].as<int>(5);
@@ -234,7 +234,7 @@ ReprojectorOptions loadReprojectorOptions(const std::string& filepath) {
 StereoTriangulationOptions loadStereoTriangulationOptions(const std::string& filepath) {
     if(filepath.size() == 0) return StereoTriangulationOptions();
 
-    YAML::Node node = YAML::LoadFile(filepath)["stereo_triangulation"];
+    YAML::Node node = YAML::LoadFile(filepath);
     StereoTriangulationOptions o;
 
     o.triangulate_n_features = node["max_fts"].as<int>(120);
@@ -248,7 +248,7 @@ StereoTriangulationOptions loadStereoTriangulationOptions(const std::string& fil
 DepthFilterOptions loadDepthFilterOptions(const std::string& filepath) {
     if(filepath.size() == 0) return DepthFilterOptions();
 
-    YAML::Node node = YAML::LoadFile(filepath)["depth_filter"];
+    YAML::Node node = YAML::LoadFile(filepath);
     DepthFilterOptions o;
 
     o.max_search_level = node["n_pyr_levels"].as<int>(3) - 1;
@@ -282,7 +282,7 @@ DepthFilterOptions loadDepthFilterOptions(const std::string& filepath) {
 DetectorOptions loadDetectorOptions(const std::string& filepath) {
     if(filepath.size() == 0) return DetectorOptions();
 
-    YAML::Node node = YAML::LoadFile(filepath)["feature_detector"];
+    YAML::Node node = YAML::LoadFile(filepath);
     DetectorOptions o;
     o.cell_size = node["grid_size"].as<int>(35);
     o.max_level = node["n_pyr_levels"].as<int>(3) - 1;
@@ -299,7 +299,7 @@ DetectorOptions loadDetectorOptions(const std::string& filepath) {
 FeatureTrackerOptions loadFeatureTrackerOptions(const std::string& filepath) {
     if(filepath.size() == 0) return FeatureTrackerOptions();
 
-    YAML::Node node = YAML::LoadFile(filepath)["feature_tracker"];
+    YAML::Node node = YAML::LoadFile(filepath);
     FeatureTrackerOptions o;
 
     o.klt_max_level = node["klt_max_level"].as<int>(4);

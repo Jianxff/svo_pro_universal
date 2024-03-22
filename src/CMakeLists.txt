@@ -8,11 +8,12 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} 
     PUBLIC
         Threads::Threads
-        yaml-cpp
-        Eigen3::Eigen
-        Ceres::ceres
         ${OpenCV_LIBS}
-
+        Eigen3::Eigen
+        opengv
+        Ceres::ceres
+        yaml-cpp
+        glog::glog
 )
 
 ## subdirectories

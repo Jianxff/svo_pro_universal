@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
 
     // set glog level
     google::InitGoogleLogging(argv[0]);
+    FLAGS_logtostderr = 1;
     FLAGS_minloglevel = google::INFO;
 
     const std::string camera_calib_file = argv[1];
@@ -51,6 +52,7 @@ int main(int argc, char* argv[]) {
 
     auto camera = svo::factory::makeCamera(camera_calib_file);
     auto svo_ = svo::factory::makeMono(camera, svo_config_file);
+    
 
     auto svo_viewer_ = std::make_shared<svo::viewer::Viewer>(svo_);
 
@@ -62,6 +64,7 @@ int main(int argc, char* argv[]) {
     std::thread viz_thread(&svo::viewer::Viewer::run, svo_viewer_);
 
     // loop
+    svo_->start();
     for(size_t i = 0; i < images.size(); ++i) {
         auto img = cv::imread(images[i]);
         svo_->addImageBundle({img}, times[i]);

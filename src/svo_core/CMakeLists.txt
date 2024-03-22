@@ -3,6 +3,8 @@ target_include_directories(${PROJECT_NAME}
         ${PROJECT_SOURCE_DIR}/3rd/minkindr/include/
 )
 
+ADD_DEFINITIONS(-DSVO_DEPTHFILTER_IN_REPROJECTOR)
+
 ## subdirectories
 add_subdirectory(rpg_common)
 add_subdirectory(svo)

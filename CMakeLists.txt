@@ -32,12 +32,20 @@ if(OPENMP_FOUND)
     add_definitions(-DUSE_OPENMP)
 endif()
 
+## OpenGV
+find_package(opengv REQUIRED)
+if(opengv_FOUND)
+    message(STATUS "OpenGV found")
+    add_definitions(-DSVO_USE_OPENGV)
+endif()
+
 ## dependencies
 find_package(Threads REQUIRED)
-find_package(yaml-cpp REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Ceres REQUIRED)
+find_package(yaml-cpp REQUIRED)
+find_package(glog REQUIRED)
 
 ## source
 add_subdirectory(src)
