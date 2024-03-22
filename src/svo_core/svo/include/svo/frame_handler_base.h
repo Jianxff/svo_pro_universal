@@ -210,8 +210,6 @@ struct BaseOptions
   /// to the global map / loop closure database is still good.
   double global_map_lc_timeout_sec_ = 3.0;
 
-  /// Load from YAML File
-  static BaseOptions loadFromYaml(const std::string& filename);
 };
 
 enum class Stage {

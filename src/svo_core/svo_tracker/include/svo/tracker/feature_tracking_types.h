@@ -39,8 +39,6 @@ struct FeatureTrackerOptions
   /// tracks are always the same age.
   bool reset_before_detection = true;
 
-  /// Load from YAML Files
-  static FeatureTrackerOptions loadFromYaml(const std::string& filename);
 };
 
 // -----------------------------------------------------------------------------

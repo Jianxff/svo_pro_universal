@@ -12,6 +12,11 @@
 
 namespace svo {
 
+// forward declaration
+class StereoTriangulationOptions;
+class StereoTriangulation;
+typedef std::shared_ptr<StereoTriangulation> StereoTriangulationPtr;
+
 /// Monocular Semi-Direct Visual Odometry Pipeline
 ///
 /// References:
@@ -21,25 +26,26 @@ namespace svo {
 ///
 /// This is the main interface class of the VO. It derives from FrameHandlerBase
 /// which maintains the state machine (start, stop, reset).
-class FrameHandlerMono : public FrameHandlerBase
+class FrameHandlerStereo : public FrameHandlerBase
 {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  typedef std::shared_ptr<FrameHandlerMono> Ptr;
+  typedef std::shared_ptr<FrameHandlerStereo> Ptr;
 
   /// Default constructor
-  FrameHandlerMono(
-      const CameraBundle::Ptr& cam,
-      const BaseOptions& base_options = BaseOptions(),
-      const DepthFilterOptions& depth_filter_options = DepthFilterOptions(),
-      const DetectorOptions& feature_detector_options = DetectorOptions(),
-      const InitializationOptions& init_options = InitializationOptions(),
-      const ReprojectorOptions& reprojector_options = ReprojectorOptions(),
-      const FeatureTrackerOptions& tracker_options = FeatureTrackerOptions()
-  );
+  FrameHandlerStereo(
+      const CameraBundle::Ptr& stereo_camera,
+      const BaseOptions& base_options,
+      const DepthFilterOptions& depth_filter_options,
+      const DetectorOptions& feature_detector_options,
+      const InitializationOptions& init_options,
+      const StereoTriangulationOptions& stereo_options,
+      const ReprojectorOptions& reprojector_options,
+      const FeatureTrackerOptions& tracker_options
+      );
 
-  virtual ~FrameHandlerMono() = default;
+  virtual ~FrameHandlerStereo() = default;
 
   /// @name Main Interface
   ///
@@ -66,9 +72,10 @@ public:
   /// \param custom_id If you would like to save an identifier key with the the
   /// frame you can provide it here. It is not used by SVO for anything but can
   /// be accessed with frame->customId().
-  //! @deprecated. use addImageBundle().
-  void addImage(
-      const cv::Mat& img,
+  // deprecated. use addImageBundle().
+  void addImages(
+      const cv::Mat& img_left,
+      const cv::Mat& img_right,
       const uint64_t timestamp);
 
   /// After adding an image to SVO with addImage(), the image is saved in a
@@ -78,22 +85,25 @@ public:
   /// \return FramePtr !!!IMPORTANT!!! can be nullptr if something did not work
   /// well or if you call this function when pipeline is not running, i.e.,
   /// vo->stage()==STAGE_PAUSED.
-  FramePtr lastFrame() const;
+  const FrameBundlePtr& lastFrames() const
+  {
+    return last_frames_;
+  }
 
   /// @}
 
-  inline CameraPtr cam() const { return cams_->getCameraShared(0); }
+  /// @name Debug Interface
+  /// These parameters should be private but are currently not for easier debugging.
+  /// It is unlikely that you need them.
+  ///
+  /// @{
+
+  // SVO Modules:
+  StereoTriangulationPtr stereo_triangulation_;
+
+  /// @}
 
 protected:
-
-  // helpers
-  const FramePtr& newFrame() const;
-
-  // unsafe because last_frame might be nullptr. use this function only
-  // when you are sure that it is set!
-  const FramePtr& lastFrameUnsafe() const;
-
-  bool haveLastFrame() const;
 
   /// Pipeline implementation. Called by base class.
   virtual UpdateResult processFrameBundle() override;
@@ -104,14 +114,10 @@ protected:
   /// Processes all frames after the first two keyframes.
   virtual UpdateResult processFrame();
 
-  /// Try relocalizing the frame at relative position to provided keyframe.
-  virtual UpdateResult relocalizeFrame(
-      const Transformation& T_cur_ref,
-      const FramePtr& ref_keyframe);
+  virtual UpdateResult makeKeyframe();
 
   /// Reset the frame handler. Implement in derived class.
   virtual void resetAll() override;
 };
 
 } // namespace svo
-

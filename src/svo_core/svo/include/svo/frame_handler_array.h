@@ -22,12 +22,12 @@ public:
   /// Default constructor
   FrameHandlerArray(
       const CameraBundle::Ptr& cameras,
-      const BaseOptions& base_options = BaseOptions(),
-      const DepthFilterOptions& depth_filter_options = DepthFilterOptions(),
-      const DetectorOptions& feature_detector_options = DetectorOptions(),
-      const InitializationOptions& init_options = InitializationOptions(),
-      const ReprojectorOptions& reprojector_options = ReprojectorOptions(),
-      const FeatureTrackerOptions& tracker_options = FeatureTrackerOptions()
+      const BaseOptions& base_options,
+      const DepthFilterOptions& depth_filter_options,
+      const DetectorOptions& feature_detector_options,
+      const InitializationOptions& init_options,
+      const ReprojectorOptions& reprojector_options,
+      const FeatureTrackerOptions& tracker_options
       );
 
   virtual ~FrameHandlerArray() = default;

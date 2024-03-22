@@ -67,8 +67,6 @@ struct ReprojectorOptions
   size_t max_n_global_kfs = 20;
   double fixed_lm_grid_size = 50;
 
-  /// Load from YAML Files
-  static ReprojectorOptions loadFromYaml(const std::string& filename);
 };
 
 /// Project points from the map into the image and find the corresponding

@@ -83,8 +83,6 @@ struct InitializationOptions
   double expected_avg_depth = 1.0;
   double init_min_depth_error = 1.0;
 
-  /// Load from YAML Files
-  static InitializationOptions loadFromYaml(const std::string& filename);
 };
 
 enum class InitResult

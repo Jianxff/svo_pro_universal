@@ -19,3 +19,4 @@
 #include <svo/map.h>
 #include <svo/reprojector.h>
 #include <svo/stereo_triangulation.h>
+#include <svo/svo_factory.h>

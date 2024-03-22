@@ -69,8 +69,6 @@ struct DepthFilterOptions
   ///
   bool extra_map_points = false;
 
-  /// Load from YAML Files
-  static DepthFilter loadFromYaml(const std::string& filename);
 };
 
 /// Depth filter implements the Bayesian Update proposed in:
