@@ -6,7 +6,6 @@
 #include <svo/frame_handler_stereo.h>
 #include <svo/frame_handler_array.h>
 
-
 #include <svo/common/camera_fwd.h>
 #include <svo/frame_handler_base.h>
 #include <svo/imu_handler.h>
@@ -65,6 +64,17 @@ std::shared_ptr<FrameHandlerStereo> makeStereo(
 std::shared_ptr<FrameHandlerArray> makeArray(
     const CameraBundlePtr& cam = nullptr,
     const std::string& config_file_path = ""
+);
+
+/// Factory for IMU
+std::shared_ptr<ImuHandler> makeIMU(
+    const std::string& imu_calib_file = "",
+    const std::string& config_file_path = ""
+);
+
+/// Factory for camera bunlde
+std::shared_ptr<CameraBundle> makeCamera(
+    const std::string& calib_file = ""
 );
 
 } // namespace factory

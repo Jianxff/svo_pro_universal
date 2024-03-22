@@ -8,7 +8,9 @@
 
 #include <svo/direct/depth_filter.h>
 #include <svo/direct/feature_detection.h>
+#include <svo/direct/feature_detection_utils.h>
 #include <svo/tracker/feature_tracker.h>
+#include <svo/tracker/feature_tracking_utils.h>
 #include <svo/common/frame.h>
 #include <svo/frame_handler_mono.h>
 #include <svo/frame_handler_stereo.h>

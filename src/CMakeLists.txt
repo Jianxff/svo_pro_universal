@@ -19,3 +19,4 @@ target_link_libraries(${PROJECT_NAME}
 add_subdirectory(svo_core)
 add_subdirectory(fast_neon)
 add_subdirectory(vikit)
+add_subdirectory(visualize)

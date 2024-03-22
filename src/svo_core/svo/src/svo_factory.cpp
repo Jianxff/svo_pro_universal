@@ -11,6 +11,12 @@ void setInitialPose(FrameHandlerBase& vo) {
     vo.setInitialImuPose(T_world_imuinit);
 }
 
+std::shared_ptr<CameraBundle> makeCamera(
+    const std::string& calib_file
+) {
+    return CameraBundle::loadFromYaml(calib_file);
+}
+
 std::shared_ptr<FrameHandlerMono> makeMono(
     const CameraBundlePtr& ncam,
     const std::string& config_file_path)
@@ -82,6 +88,19 @@ std::shared_ptr<FrameHandlerArray> makeArray(
     // Get initial position and orientation of IMU
     setInitialPose(*vo);
     return vo;
+}
+
+std::shared_ptr<ImuHandler> makeIMU(
+    const std::string& calib_file_path,
+    const std::string& config_file_path
+) {
+    ImuHandler::Ptr imu = std::make_shared<ImuHandler>(
+        ImuHandler::loadCalibrationFromFile(calib_file_path),
+        ImuHandler::loadInitializationFromFile(calib_file_path),
+        loadIMUHandlerOptions(config_file_path)
+    );
+
+    return imu;
 }
 
 
