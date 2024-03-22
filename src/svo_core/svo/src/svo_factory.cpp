@@ -182,7 +182,7 @@ InitializationOptions loadInitializationOptions(const std::string& filepath) {
     o.init_min_features_factor = node["init_min_features_factor"].as<double>(2.0);
     o.reproj_error_thresh = node["reproj_err_thresh"].as<double>(2.0);
     o.init_disparity_pivot_ratio = node["init_disparity_pivot_ratio"].as<double>(0.5);
-    std::string init_method = node["init_method"].as<std::string>("FivePoint");
+    std::string init_method = node["init_method"].as<std::string>("Homography");
     if(init_method == "Homography")
         o.init_type = InitializerType::kHomography;
     else if(init_method == "TwoPoint")
