@@ -14,8 +14,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result -Wno-ignored-attributes")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result -Wno-ignored-attributes")
 
 ## cmake optimize
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -ffast-math -mtune=native")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -ffast-math -mtune=native")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -msse -msse2 -msse3 -ffast-math -mtune=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -msse -msse2 -msse3 -ffast-math -mtune=native")
 
 ## ccache
 find_program(CCACHE_EXE ccache)

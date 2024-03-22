@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
     for(size_t i = 0; i < images.size(); ++i) {
         auto img = cv::imread(images[i]);
         svo_->addImageBundle({img}, times[i]);
-        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
     viz_thread.join();
