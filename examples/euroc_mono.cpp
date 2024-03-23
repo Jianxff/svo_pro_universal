@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 
     auto camera = svo::factory::makeCamera(camera_calib_file);
     auto svo_ = svo::factory::makeMono(camera, svo_config_file);
-    
+    const bool auto_reinitialize = true;
 
     auto svo_viewer_ = std::make_shared<svo::viewer::Viewer>(svo_);
 
@@ -68,9 +68,13 @@ int main(int argc, char* argv[]) {
     for(size_t i = 0; i < images.size(); ++i) {
         auto img = cv::imread(images[i]);
         svo_->addImageBundle({img}, times[i]);
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        if(svo_->stage() == svo::Stage::kPaused && auto_reinitialize) {
+            svo_->start();
+        }
+        // std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
+    svo_viewer_->exit();
     viz_thread.join();
 
     return 0;

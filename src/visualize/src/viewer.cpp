@@ -135,6 +135,10 @@ void Viewer::update_vo() {
             break;
         }
         case Stage::kInitializing: {
+            traj_cam_.clear();
+            traj_imu_.clear();
+            region_lm_.clear();
+            transform_Twc_.SetIdentity();
             update_vo_initializing_();
             break;
         }
@@ -187,6 +191,9 @@ void Viewer::update_vo_tracking_() {
 void Viewer::update_vo_initializing_() {
     auto ref_frames = pvo_->initializer_->frames_ref_;
     auto last_frames = pvo_->getLastFrames();
+
+    if(!last_frames ||last_frames->size() == 0) return;
+    
     cv::Mat img = last_frames->at(0)->img().clone();
 
     if (ref_frames) {
