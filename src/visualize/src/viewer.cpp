@@ -113,14 +113,14 @@ void Viewer::drawTrajectory() {
     glLineWidth(2);
     glBegin(GL_LINE_STRIP);
     for(const auto& pos : traj_cam_) {
-        glColor3f(1.0,0.0,0.0);
+        glColor3f(0.0,0.0,1.0);
         glVertex3d(pos(0), pos(1), pos(2));
     }
     glEnd();
 
     glBegin(GL_LINE_STRIP);
     for(const auto& pos : traj_imu_) {
-        glColor3f(0.0,0.0,1.0);
+        glColor3f(1.0,0.0,0.0);
         glVertex3d(pos(0), pos(1), pos(2));
     }
     glEnd();
@@ -160,7 +160,7 @@ void Viewer::update_vo_tracking_() {
     traj_imu_.push_back(pose_imu.getPosition());
 
     // update pose
-    Eigen::Matrix4d Twc = pose_imu.getTransformationMatrix();
+    Eigen::Matrix4d Twc = trans_cam.getTransformationMatrix();
     transform_Twc_ = pangolin::OpenGlMatrix(Twc);
 
     // update map points

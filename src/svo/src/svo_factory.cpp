@@ -309,6 +309,109 @@ FeatureTrackerOptions loadFeatureTrackerOptions(const std::string& filepath) {
 }
 
 
-     
 } // namespace factory
+
+
+Odometry::Odometry(
+    const Type type,
+    const std::string& calib_file,
+    const std::string& svo_config_file,
+    const bool set_initial_attitude_from_gravity
+) : type_(type), set_initial_attitude_from_gravity_(set_initial_attitude_from_gravity)
+{
+    auto camera = factory::makeCamera(calib_file);
+    if(type == Type::kMono || type == Type::kMonoIMU)
+        frame_handler_ = mono_frame_handler_ = factory::makeMono(camera, svo_config_file);
+    else if(type == Type::kStereo || type == Type::kStereoIMU)
+        frame_handler_ = stereo_frame_handler_ = factory::makeStereo(camera, svo_config_file); 
+    if(type == Type::kMonoIMU || type == Type::kStereoIMU) {
+        imu_handler_ = factory::makeIMU(calib_file, svo_config_file);
+        frame_handler_->imu_handler_ = imu_handler_;
+    }
+    //
+}
+
+FrameHandlerMono::Ptr Odometry::frame_handler_mono() const {
+    return mono_frame_handler_;
+}
+
+FrameHandlerStereo::Ptr Odometry::frame_handler_stereo() const {
+    return stereo_frame_handler_;
+}
+
+std::shared_ptr<FrameHandlerBase> Odometry::frame_handler() const {
+    return frame_handler_;
+}
+
+ImuHandler::Ptr Odometry::imu_handler() const {
+    return imu_handler_;
+}
+
+void Odometry::start() const {
+    frame_handler_->start();
+}
+
+const Stage Odometry::stage() const {
+    return frame_handler_->stage();
+}
+
+
+bool Odometry::_set_imu_prior(const uint64_t timestamp) const{
+    if(imu_handler_ == nullptr) return true;
+    std::shared_ptr<FrameHandlerBase> vo = frame_handler_;
+    ///
+    if(!vo->hasStarted() && set_initial_attitude_from_gravity_) {
+        Quaternion R_imu_world;
+        if(imu_handler_->getInitialAttitude(
+            timestamp * common::conversions::kNanoSecondsToSeconds,
+            R_imu_world
+        )) {
+            VLOG(3) << "Set initial orientation from accelerometer measurements.";
+            vo->setRotationPrior(R_imu_world);
+        } else {
+            return false;
+        }
+    } else if(vo->getLastFrames()) {
+        // set incremental rotation prior
+        Quaternion R_lastimu_newimu;
+        if(imu_handler_->getRelativeRotationPrior(
+            vo->getLastFrames()->getMinTimestampNanoseconds() * common::conversions::kNanoSecondsToSeconds,
+            timestamp * common::conversions::kNanoSecondsToSeconds,
+            false, R_lastimu_newimu
+        )) {
+        VLOG(3) << "Set incremental rotation prior from IMU.";
+        vo->setRotationIncrementPrior(R_lastimu_newimu);
+        }
+    }
+    return true;
+}
+
+void Odometry::addImageBundle(
+    const std::vector<cv::Mat>& imgs,
+    const uint64_t timestamp
+) const {
+    if(!_set_imu_prior(timestamp)){
+        VLOG(3) << "Could not align gravity! Attempting again in next iteration.";
+        return;
+    }
+
+    frame_handler_->addImageBundle(imgs, timestamp);
+}
+
+void Odometry::addImuMeasurement(
+    const uint64_t timestamp,
+    const Eigen::Vector3d &gyro,
+    const Eigen::Vector3d &acc
+) const {
+    if(imu_handler_ == nullptr) return;
+    const ImuMeasurement m(
+        timestamp * common::conversions::kNanoSecondsToSeconds,
+        gyro,
+        acc
+    );
+
+    imu_handler_->addImuMeasurement(m);
+}
+
+
 } // namespace svo

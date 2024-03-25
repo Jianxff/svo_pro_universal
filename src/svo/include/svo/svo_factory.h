@@ -78,6 +78,56 @@ std::shared_ptr<CameraBundle> makeCamera(
 );
 
 } // namespace factory
+
+/// Full system
+class Odometry {
+public:
+    enum Type {
+        kMono,
+        kStereo,
+        kMonoIMU,
+        kStereoIMU,
+    };
+
+    Odometry(
+        const Type type,
+        const std::string& calib_file,
+        const std::string& svo_config_file,
+        const bool set_initial_attitude_from_gravity = true
+    );
+
+    FrameHandlerMono::Ptr frame_handler_mono() const;
+    FrameHandlerStereo::Ptr frame_handler_stereo() const;
+    std::shared_ptr<FrameHandlerBase> frame_handler() const;
+    ImuHandler::Ptr imu_handler() const;
+
+    void start() const;
+
+    const Stage stage() const;
+
+    void addImageBundle(
+        const std::vector<cv::Mat>& imgs,
+        const uint64_t timestamp
+    ) const;
+
+    void addImuMeasurement(
+        const uint64_t timestamp,
+        const Eigen::Vector3d &gyro,
+        const Eigen::Vector3d &acc
+    ) const;
+
+private:
+    bool _set_imu_prior(const uint64_t timestamp) const;
+
+    ImuHandlerPtr imu_handler_;
+    FrameHandlerMono::Ptr mono_frame_handler_;
+    FrameHandlerStereo::Ptr stereo_frame_handler_;
+    std::shared_ptr<FrameHandlerBase> frame_handler_;
+    bool set_initial_attitude_from_gravity_;
+
+    const Type type_;
+};
+
 } // namespace svo
 
 

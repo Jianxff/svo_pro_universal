@@ -8,18 +8,17 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <Eigen/Core>
+
+
 namespace fs = std::filesystem;
 
 namespace dataset {
 class Euroc{
 public:
     struct Imu {
-        struct Gyro {
-            double x, y, z;
-        } gryo;
-        struct Acc {
-            double x, y, z;
-        } acc;      
+        Eigen::Vector3d gyro;
+        Eigen::Vector3d acc;
     };
 
     struct CamData{
@@ -41,7 +40,7 @@ public:
         reset();
     }
 
-    void load_image(const bool preload = false) {
+    void load_image(const bool preload = false){
         _read_cam_data();
         if(preload) {
             preload_ = true;
@@ -61,7 +60,7 @@ public:
         _read_imu_data();
     }
 
-    void reset() {
+    void reset() const {
         image_pt_ = 0;
         imu_pt_ = 0;
     }
@@ -87,6 +86,32 @@ public:
         data.imu = get_imu(imu_pt_);
         imu_pt_++;
         return data;
+    }
+
+    const std::vector<ImuData> next_imu_all() const {
+        std::vector<ImuData> data;
+        const auto next_ts = cur_cam_ts(1);
+        while(cur_imu_ts() < next_ts && imu_pt_ < imu_ts.size()) {
+            const auto d = next_imu();
+            data.push_back(d);
+        }
+        return data;
+    }
+
+    const uint64_t cur_cam_ts(int bias = 0) const{
+        return cam_ts[image_pt_ + bias];
+    }
+
+    const uint64_t cur_imu_ts(int bias = 0) const{
+        return imu_ts[imu_pt_ + bias];
+    }
+
+    void back_cam(const size_t n = 1) const{
+        image_pt_ = (image_pt_ < n ? 0 : image_pt_ - n);
+    }
+
+    void back_imu(const size_t n = 1) const{
+        imu_pt_ = (imu_pt_ < n ? 0 : imu_pt_ - n);
     }
     
     const cv::Mat get_cam(const size_t idx, const int cam_id) const{
@@ -121,6 +146,15 @@ public:
 
     const size_t size_imu() const{
         return imu_ts.size();
+    }
+
+    void align() const {
+        if(imu_ts.size() == 0 || cam_ts.size() == 0) return;
+        const auto first_ts = std::min(imu_ts.front(), cam_ts.front());
+        while(imu_ts[imu_pt_] < first_ts)
+            imu_pt_++;
+        while(cam_ts[image_pt_] < first_ts)
+            image_pt_++;
     }
 
     static Euroc create(const std::string& mav_dir,
@@ -210,8 +244,11 @@ private:
             ss >> ts_u64;
             imu_ts.push_back(ts_u64);
             Imu imu;
-            ss >> imu.gryo.x >> imu.gryo.y >> imu.gryo.z;
-            ss >> imu.acc.x >> imu.acc.y >> imu.acc.z;
+            double x, y, z;
+            ss >> x >> y >> z;
+            imu.gyro = Eigen::Vector3d(x, y, z);
+            ss >> x >> y >> z;
+            imu.acc = Eigen::Vector3d(x, y, z);
             imu0.push_back(imu);
         }
 

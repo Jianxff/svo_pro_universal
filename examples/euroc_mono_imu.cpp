@@ -8,9 +8,10 @@
 
 #include "dataset.hpp"
 
+
 int main(int argc, char* argv[]) {
     if(argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " <camera_calib_file> <svo_config_file> <euroc_mav_directory>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <calib_file> <svo_config_file> <euroc_mav_directory>" << std::endl;
         return 1;
     }
 
@@ -19,34 +20,45 @@ int main(int argc, char* argv[]) {
     FLAGS_logtostderr = 1;
     FLAGS_minloglevel = google::INFO;
 
-    const std::string camera_calib_file = argv[1];
+    const std::string calib_file = argv[1];
     const std::string svo_config_file = argv[2];
     const std::string euroc_mav_dir = argv[3];
 
-    const auto vo = svo::Odometry(
-        svo::Odometry::Type::kMono,
-        camera_calib_file,
+    const auto vio = svo::Odometry(
+        svo::Odometry::kMonoIMU,
+        calib_file,
         svo_config_file
     );
 
-    // load frames
-    const dataset::Euroc euroc_ = dataset::Euroc::create(euroc_mav_dir);
+    auto svo_viewer_ = std::make_shared<svo::viewer::Viewer>(vio.frame_handler());
 
-    auto svo_viewer_ = std::make_shared<svo::viewer::Viewer>(vo.frame_handler());
+    // load frames
+    const dataset::Euroc euroc_ = dataset::Euroc::create(euroc_mav_dir, true);
+    euroc_.align();
+
     std::thread viz_thread(&svo::viewer::Viewer::run, svo_viewer_);
 
     // loop
-    vo.start();
+    vio.start();
     for(;;) {
+
+
+        const auto imu_data = euroc_.next_imu_all();
+        for(const auto& idata : imu_data) {
+            if(idata.valid()) {
+                vio.addImuMeasurement(
+                    idata.ts, idata.imu.gyro, idata.imu.acc
+                );
+            }
+        }
         const auto data = euroc_.next_cam();
         if(!data.valid()) {
             break;
         }
-        vo.addImageBundle({data.cam0}, data.ts);
-
-        if(vo.stage() == svo::Stage::kPaused) {
+        vio.addImageBundle({data.cam0}, data.ts);
+        if(vio.stage() == svo::Stage::kPaused) {
             cv::waitKey(0);
-            vo.start();
+            vio.start();
         }
         // std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
