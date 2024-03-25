@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     // loop
     vo.start();
     for(;;) {
-        const auto data = euroc_.next_cam();
+        const auto data = euroc_.nextFrame();
         if(!data.valid()) {
             break;
         }

@@ -41,21 +41,22 @@ int main(int argc, char* argv[]) {
     // loop
     vio.start();
     for(;;) {
-
-
-        const auto imu_data = euroc_.next_imu_all();
-        for(const auto& idata : imu_data) {
-            if(idata.valid()) {
+        // add imu data
+        const auto imu_data = euroc_.nextImuAll();
+        for(const auto& imu : imu_data) {
+            if(imu.valid()) {
                 vio.addImuMeasurement(
-                    idata.ts, idata.imu.gyro, idata.imu.acc
+                    imu.ts, imu.gyro, imu.acc
                 );
             }
         }
-        const auto data = euroc_.next_cam();
+        // add frame data
+        const auto data = euroc_.nextFrame();
         if(!data.valid()) {
             break;
         }
         vio.addImageBundle({data.cam0}, data.ts);
+        // check frame status
         if(vio.stage() == svo::Stage::kPaused) {
             cv::waitKey(0);
             vio.start();
