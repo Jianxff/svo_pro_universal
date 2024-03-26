@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <thread>
+#include <queue>
 
 #include <svo/frame_handler_mono.h>
 #include <svo/frame_handler_stereo.h>
@@ -103,20 +105,24 @@ public:
 
     void start() const;
 
+    const Eigen::Matrix4d transform_world_cam();
+    const Eigen::Matrix3d rotation_world_cam();
+    const Eigen::Vector3d translation_world_cam();
+
     const Stage stage() const;
 
-    void addImageBundle(
+    virtual void addImageBundle(
         const std::vector<cv::Mat>& imgs,
         const uint64_t timestamp
     ) const;
 
-    void addImuMeasurement(
+    virtual void addImuMeasurement(
         const uint64_t timestamp,
         const Eigen::Vector3d &gyro,
         const Eigen::Vector3d &acc
     ) const;
 
-private:
+protected:
     bool _set_imu_prior(const uint64_t timestamp) const;
 
     ImuHandlerPtr imu_handler_;
@@ -126,6 +132,51 @@ private:
     bool set_initial_attitude_from_gravity_;
 
     const Type type_;
+};
+
+class OdometryParallel : public Odometry {
+public:
+    OdometryParallel(
+        const Type type,
+        const std::string& calib_file,
+        const std::string& svo_config_file,
+        const bool sync = false,
+        const size_t frame_cache_limit = 120,
+        const bool set_initial_attitude_from_gravity = true
+    );
+
+    void exit();
+
+    void pushFrameBundle(
+        const std::vector<cv::Mat>& imgs,
+        const uint64_t timestamp
+    );
+
+    void pushImuMeasurement(
+        const uint64_t timestamp,
+        const Eigen::Vector3d &gyro,
+        const Eigen::Vector3d &acc
+    );
+
+protected:
+    const bool sync_;
+    const size_t frame_cache_limit_;
+    uint64_t current_timestamp_;
+
+    std::thread frame_thread_;
+    std::thread imu_thread_;
+    std::atomic<bool> exit_;
+
+    void _check_frame_queue();
+    void _check_imu_queue();
+    void _frame_loop();
+    void _imu_loop();
+
+    std::queue<std::pair<uint64_t, std::vector<cv::Mat>>> frame_queue_;
+    std::queue<ImuMeasurement> imu_queue_;
+
+    std::mutex frame_queue_mutex_;
+    std::mutex imu_queue_mutex_;
 };
 
 } // namespace svo

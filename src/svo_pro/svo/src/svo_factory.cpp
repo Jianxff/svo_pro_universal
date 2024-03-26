@@ -355,6 +355,32 @@ const Stage Odometry::stage() const {
     return frame_handler_->stage();
 }
 
+const Eigen::Matrix4d Odometry::transform_world_cam() {
+    auto last_frame = frame_handler_->getLastFrames();
+    if(last_frame == nullptr || last_frame->size() == 0) 
+        return Eigen::Matrix4d::Identity();
+
+    Eigen::Matrix4d T = last_frame->at(0)->T_world_cam().getTransformationMatrix();
+    return T;
+}
+
+const Eigen::Matrix3d Odometry::rotation_world_cam() {
+    auto last_frame = frame_handler_->getLastFrames();
+    if(last_frame == nullptr || last_frame->size() == 0) 
+        return Eigen::Matrix3d::Identity();
+
+    Eigen::Matrix3d R = last_frame->at(0)->T_world_cam().getRotationMatrix();
+    return R;
+}
+
+const Eigen::Vector3d Odometry::translation_world_cam() {
+    auto last_frame = frame_handler_->getLastFrames();
+    if(last_frame == nullptr || last_frame->size() == 0) 
+        return Eigen::Vector3d::Zero();
+
+    Eigen::Vector3d t = last_frame->at(0)->T_world_cam().getPosition();
+    return t;
+}
 
 bool Odometry::_set_imu_prior(const uint64_t timestamp) const{
     if(imu_handler_ == nullptr) return true;
@@ -412,6 +438,125 @@ void Odometry::addImuMeasurement(
 
     imu_handler_->addImuMeasurement(m);
 }
+
+
+OdometryParallel::OdometryParallel(
+    const Type type,
+    const std::string& calib_file,
+    const std::string& svo_config_file,
+    const bool sync = false,
+    const size_t frame_cache_limit = 10,
+    const bool set_initial_attitude_from_gravity
+) : Odometry(type, calib_file, svo_config_file, set_initial_attitude_from_gravity),
+    sync_(sync), frame_cache_limit_(frame_cache_limit)
+{
+    frame_thread_ = std::thread(&OdometryParallel::_frame_loop, this);
+    if(imu_handler_ != nullptr)
+        imu_thread_ = std::thread(&OdometryParallel::_imu_loop, this); 
+    current_timestamp_ = -1;
+}
+
+
+void OdometryParallel::exit() {
+    exit_ = true;
+    frame_thread_.join();
+    if(imu_handler_ != nullptr)
+        imu_thread_.join();
+}
+
+void OdometryParallel::pushFrameBundle(
+    const std::vector<cv::Mat>& imgs,
+    const uint64_t timestamp
+) {
+    {
+        std::lock_guard<std::mutex> lock(frame_queue_mutex_);
+        frame_queue_.push(std::make_pair(timestamp, imgs));
+    }
+    if(!sync_)
+        _check_frame_queue();
+}
+
+void OdometryParallel::pushImuMeasurement(
+    const uint64_t timestamp,
+    const Eigen::Vector3d &gyro,
+    const Eigen::Vector3d &acc
+) {
+    {
+        std::lock_guard<std::mutex> lock(imu_queue_mutex_);
+        imu_queue_.push(ImuMeasurement(
+            timestamp * common::conversions::kNanoSecondsToSeconds,
+            gyro,
+            acc
+        ));
+    }
+    _check_imu_queue();
+}
+
+
+void OdometryParallel::_check_frame_queue() {
+    if(sync_) return;
+    const size_t sz = frame_queue_.size();
+    if(sz >= frame_cache_limit_ * 1.5) {
+        VLOG(3) << "Too many frames freezed: " << sz << ", dropping ..." << frame_cache_limit_;
+        {
+            std::lock_guard<std::mutex> lock(frame_queue_mutex_);
+            while(frame_queue_.size() > frame_cache_limit_) {
+                frame_queue_.pop();
+            }
+        }
+    }
+}
+
+void OdometryParallel::_check_imu_queue() {
+    if(sync_ || imu_queue_.empty() || current_timestamp_ == -1) return;
+    double ts = svo::common::conversions::kNanoSecondsToSeconds;
+    {
+        std::lock_guard<std::mutex> lock(imu_queue_mutex_);
+            while(!imu_queue_.empty() && imu_queue_.front().timestamp_ < ts) {
+            imu_queue_.pop();
+        }
+    }
+}
+
+void OdometryParallel::_frame_loop() {
+    while(!exit_) {
+        if(frame_queue_.empty()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(15));
+            continue;
+        }
+
+        const auto bundle = frame_queue_.front();
+        {
+            std::lock_guard<std::mutex> lock(frame_queue_mutex_);
+            frame_queue_.pop();
+        }
+        
+        // add image bundle
+        if(!_set_imu_prior(bundle.first)){
+            VLOG(3) << "Could not align gravity! Attempting again in next iteration.";
+            continue;;
+        }
+        current_timestamp_ = bundle.first;
+        frame_handler_->addImageBundle(bundle.second, bundle.first);
+    }
+}
+
+void OdometryParallel::_imu_loop() {
+    while(!exit_) {
+        if(imu_queue_.empty()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            continue;
+        }
+        const auto m = imu_queue_.front();
+        {
+            std::lock_guard<std::mutex> lock(imu_queue_mutex_);
+            imu_queue_.pop();
+        }
+        imu_handler_->addImuMeasurement(m);
+    }
+}
+
+
 
 
 } // namespace svo
