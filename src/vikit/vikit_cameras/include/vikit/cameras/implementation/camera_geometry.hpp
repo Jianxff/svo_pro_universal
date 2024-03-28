@@ -21,7 +21,7 @@ bool CameraGeometry<Projection>::backProject3(
     const Eigen::Ref<const Eigen::Vector2d>& keypoint,
     Eigen::Vector3d* out_point_3d) const
 {
-  CHECK_NOTNULL(out_point_3d);
+  // CHECK_NOTNULL(out_point_3d);
   return projection_.backProject3(keypoint, out_point_3d);
 }
 

@@ -26,10 +26,10 @@ Transformation2DTemplate<Scalar>::Transformation2DTemplate(
           Rotation2D().fromRotationMatrix(T.template topLeftCorner<2, 2>().eval()),
           T.template topRightCorner<2, 1>().eval()) {
   constexpr Scalar kEpsilon = std::numeric_limits<Scalar>::epsilon();
-  CHECK_LE((T(2, 2) - static_cast<Scalar>(1.0)), kEpsilon);
+  // CHECK_LE((T(2, 2) - static_cast<Scalar>(1.0)), kEpsilon);
   const Eigen::Matrix<Scalar, 2, 2> rotation_matrix =
       T.template topLeftCorner<2, 2>().eval();
-  CHECK_NEAR(rotation_matrix.determinant(), static_cast<Scalar>(1.0), kEpsilon);
+  // CHECK_NEAR(rotation_matrix.determinant(), static_cast<Scalar>(1.0), kEpsilon);
 }
 
 template <typename Scalar>

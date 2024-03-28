@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 #include <Eigen/Geometry>
 
 #include <kindr/minimal/position.h>
@@ -23,7 +23,7 @@ typedef kindr::minimal::Position Position3D;
 
 inline void removeAnyEndOfLineCharacter(std::string* line)
 {
-  CHECK_NOTNULL(line);
+  // CHECK_NOTNULL(line);
   for (std::string::iterator it = line->begin(); it != line->end(); ) {
     if ((*it == '\r') || (*it == '\n')) {
       it = line->erase(it);
@@ -38,7 +38,7 @@ inline bool readNextLine(
     std::ifstream& csv_file_stream,
     std::vector<std::string>* fields)
 {
-  CHECK_NOTNULL(fields)->clear();
+  // CHECK_NOTNULL(fields)->clear();
   // Read the line.
   std::string line;
   if (!std::getline(csv_file_stream, line)) {
@@ -56,17 +56,17 @@ inline bool readNextLine(
   fields->resize(num_fields_per_line);
   std::stringstream line_stream(line);
   for (size_t idx = 0u; idx < num_fields_per_line; ++idx) {
-    CHECK(!line_stream.eof());
+    // CHECK(!line_stream.eof());
     std::getline(line_stream, (*fields)[idx], field_delimiter);
 
-    CHECK(!(*fields)[idx].empty()) << "Too few fields per line."
-          << " Found " << idx + 1 << " fields but expected " << num_fields_per_line << ".";
+    // CHECK(!(*fields)[idx].empty()) << "Too few fields per line."
+          // << " Found " << idx + 1 << " fields but expected " << num_fields_per_line << ".";
   }
   return true;
 }
 
 inline double convertStringToDouble(const std::string& number_as_string) {
-  CHECK(!number_as_string.empty());
+  // CHECK(!number_as_string.empty());
   double number_as_double = 0;
   try {
     number_as_double = std::stod(number_as_string);
@@ -86,9 +86,9 @@ inline double convertStringToDouble(const std::string& number_as_string) {
 inline Eigen::Vector3d convertStringsToEigenVector3d(const std::string& string_x,
                                                      const std::string& string_y,
                                                      const std::string& string_z) {
-  CHECK(!string_x.empty());
-  CHECK(!string_y.empty());
-  CHECK(!string_z.empty());
+  // CHECK(!string_x.empty());
+  // CHECK(!string_y.empty());
+  // CHECK(!string_z.empty());
   Eigen::Vector3d vector;
   vector.setZero();
   try {
@@ -111,10 +111,10 @@ inline Eigen::Vector3d convertStringsToEigenVector3d(const std::string& string_x
 
 inline Quaternion convertStringsToQuaternion(
     const std::string& qw, const std::string& qx, const std::string& qy, const std::string& qz) {
-  CHECK(!qw.empty());
-  CHECK(!qx.empty());
-  CHECK(!qy.empty());
-  CHECK(!qz.empty());
+  // CHECK(!qw.empty());
+  // CHECK(!qx.empty());
+  // CHECK(!qy.empty());
+  // CHECK(!qz.empty());
   Quaternion quaternion;
   quaternion.setIdentity();
   try {
@@ -142,7 +142,7 @@ inline Quaternion convertStringsToQuaternion(
 }
 
 inline int64_t convertStringToLongLong(const std::string& number_as_string) {
-  CHECK(!number_as_string.empty());
+  // CHECK(!number_as_string.empty());
   int64_t number_as_longlong = 0;
   try {
     number_as_longlong = std::stoll(number_as_string);

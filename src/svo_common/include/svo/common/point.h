@@ -13,7 +13,7 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 #include <svo/common/types.h>
 
 namespace svo {
@@ -42,7 +42,7 @@ struct KeypointIdentifier
 
   inline bool operator ==(const KeypointIdentifier& other) const
   {
-    CHECK(frame.lock() && other.frame.lock());
+    // CHECK(frame.lock() && other.frame.lock());
     return frame.lock().get() == other.frame.lock().get() &&
         frame_id == other.frame_id && keypoint_index_ == other.keypoint_index_;
   }

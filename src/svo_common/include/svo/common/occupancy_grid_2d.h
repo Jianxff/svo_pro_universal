@@ -1,7 +1,7 @@
 #pragma once
 
 #include <svo/common/types.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
 namespace svo
 {
 /// We divide the image into a grid of cells and try to find maximally one
@@ -63,13 +63,13 @@ public:
 
   inline bool isOccupied(const size_t cell_index)
   {
-    CHECK_LT(cell_index, occupancy_.size());
+    // CHECK_LT(cell_index, occupancy_.size());
     return occupancy_[cell_index];
   }
 
   inline void setOccupied(const size_t cell_index)
   {
-    CHECK_LT(cell_index, occupancy_.size());
+    // CHECK_LT(cell_index, occupancy_.size());
     occupancy_[cell_index] = true;
   }
 

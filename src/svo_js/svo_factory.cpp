@@ -42,6 +42,12 @@ emscripten::val convert_eigen_emarray(const Eigen::MatrixX<T> matrix) {
     return array;
 }
 
+template<typename T>
+T read_val(const emscripten::val value, const T default_val = T()) {
+    if(value == emscripten::val::undefined()) return default_val;
+    return value.as<T>();
+}
+
 void setInitialPose(FrameHandlerBase& vo) {
     Transformation T_world_imuinit(
         Eigen::Quaternion(1.0,0.0,0.0,0.0),
@@ -54,8 +60,8 @@ std::shared_ptr<CameraBundle> makeCamera(
     const emscripten::val calib
 ) {
     // Cameras
-    const uint32_t imwidth = calib["width"].as<uint32_t>();
-    const uint32_t imheight = calib["height"].as<uint32_t>();
+    const uint32_t imwidth = read_val<uint32_t>(calib["width"]);
+    const uint32_t imheight = read_val<uint32_t>(calib["height"]);
     Eigen::Vector4d intrinsics;
     if(calib["intrinsics"] == emscripten::val::undefined()) {
         const double focal = std::max(imwidth, imheight) * 1.2;
@@ -125,16 +131,16 @@ std::shared_ptr<ImuHandler> makeIMU(
 
 ImuCalibration loadImuCalibration(const emscripten::val data){
     ImuCalibration calib;
-    calib.delay_imu_cam = data["imu_params"]["delay_imu_cam"].as<double>();
-    calib.max_imu_delta_t = data["imu_params"]["max_imu_delta_t"].as<double>();
-    calib.saturation_accel_max = data["imu_params"]["acc_max"].as<double>();
-    calib.saturation_omega_max = data["imu_params"]["omega_max"].as<double>();
-    calib.gyro_noise_density = data["imu_params"]["sigma_omega_c"].as<double>();
-    calib.acc_noise_density = data["imu_params"]["sigma_acc_c"].as<double>();
-    calib.gyro_bias_random_walk_sigma = data["imu_params"]["sigma_omega_bias_c"].as<double>();
-    calib.acc_bias_random_walk_sigma = data["imu_params"]["sigma_acc_bias_c"].as<double>();
-    calib.gravity_magnitude = data["imu_params"]["g"].as<double>();
-    calib.imu_rate = data["imu_params"]["imu_rate"].as<double>();
+    calib.delay_imu_cam = read_val<double>(data["imu_params"]["delay_imu_cam"]);
+    calib.max_imu_delta_t = read_val<double>(data["imu_params"]["max_imu_delta_t"]);
+    calib.saturation_accel_max = read_val<double>(data["imu_params"]["acc_max"]);
+    calib.saturation_omega_max = read_val<double>(data["imu_params"]["omega_max"]);
+    calib.gyro_noise_density = read_val<double>(data["imu_params"]["sigma_omega_c"]);
+    calib.acc_noise_density = read_val<double>(data["imu_params"]["sigma_acc_c"]);
+    calib.gyro_bias_random_walk_sigma = read_val<double>(data["imu_params"]["sigma_omega_bias_c"]);
+    calib.acc_bias_random_walk_sigma = read_val<double>(data["imu_params"]["sigma_acc_bias_c"]);
+    calib.gravity_magnitude = read_val<double>(data["imu_params"]["g"]);
+    calib.imu_rate = read_val<double>(data["imu_params"]["imu_rate"]);
     return calib;
 }
 
@@ -142,79 +148,81 @@ ImuCalibration loadImuCalibration(const emscripten::val data){
 ImuInitialization loadImuInitialization(const emscripten::val data){
     ImuInitialization init;
     init.velocity = Eigen::Vector3d(
-          data["imu_initialization"]["velocity"][0].as<double>(),
-          data["imu_initialization"]["velocity"][1].as<double>(),
-          data["imu_initialization"]["velocity"][2].as<double>());
+        read_val<double>(data["imu_initialization"]["velocity"][0]),
+        read_val<double>(data["imu_initialization"]["velocity"][1]),
+        read_val<double>(data["imu_initialization"]["velocity"][2])
+    );
     init.omega_bias = Eigen::Vector3d(
-          data["imu_initialization"]["omega_bias"][0].as<double>(),
-          data["imu_initialization"]["omega_bias"][1].as<double>(),
-          data["imu_initialization"]["omega_bias"][2].as<double>());
+        read_val<double>(data["imu_initialization"]["omega_bias"][0]),
+        read_val<double>(data["imu_initialization"]["omega_bias"][1]),
+        read_val<double>(data["imu_initialization"]["omega_bias"][2])
+    );
     init.acc_bias = Eigen::Vector3d(
-          data["imu_initialization"]["acc_bias"][0].as<double>(),
-          data["imu_initialization"]["acc_bias"][1].as<double>(),
-          data["imu_initialization"]["acc_bias"][2].as<double>());
-    init.velocity_sigma = data["imu_initialization"]["velocity_sigma"].as<double>();
-    init.omega_bias_sigma = data["imu_initialization"]["omega_bias_sigma"].as<double>();
-    init.acc_bias_sigma = data["imu_initialization"]["acc_bias_sigma"].as<double>();
+        read_val<double>(data["imu_initialization"]["acc_bias"][0]),
+        read_val<double>(data["imu_initialization"]["acc_bias"][1]),
+        read_val<double>(data["imu_initialization"]["acc_bias"][2])
+    );
+    init.velocity_sigma = read_val<double>(data["imu_initialization"]["velocity_sigma"]);
+    init.omega_bias_sigma = read_val<double>(data["imu_initialization"]["omega_bias_sigma"]);
+    init.acc_bias_sigma = read_val<double>(data["imu_initialization"]["acc_bias_sigma"]);
     return init;
 }
 
 
 BaseOptions loadBaseOptions(const emscripten::val node) {
     BaseOptions o;
-    o.max_n_kfs = node["max_n_kfs"].as<int>(5);
-    o.use_imu = node["use_imu"].as<bool>(false);
-    o.trace_dir = node["trace_dir"].as<std::string>("./");
-    o.quality_min_fts = node["quality_min_fts"].as<int>(50);
-    o.quality_max_fts_drop = node["quality_max_drop_fts"].as<int>(40);
-    o.relocalization_max_trials = node["relocalization_max_trials"].as<int>(50);
-    o.poseoptim_prior_lambda = node["poseoptim_prior_lambda"].as<double>(0.0);
-    o.poseoptim_using_unit_sphere = node["poseoptim_using_unit_sphere"].as<bool>(false);
-    o.img_align_prior_lambda_rot = node["img_align_prior_lambda_rot"].as<double>(0.0);
-    o.img_align_prior_lambda_trans = node["img_align_prior_lambda_trans"].as<double>(0.0);
-    o.structure_optimization_max_pts = node["structure_optimization_max_pts"].as<int>(20);
-    o.init_map_scale = node["map_scale"].as<double>(1.0);
-    const std::string kfselect_criterion = node["kfselect_criterion"].as<std::string>("FORWARD");
+    o.max_n_kfs = (size_t)read_val<int>(node["max_n_kfs"], 5);
+    o.use_imu = read_val<bool>(node["use_imu"], false);
+    o.quality_min_fts = read_val<int>(node["quality_min_fts"], 50);
+    o.quality_max_fts_drop = read_val<int>(node["quality_max_drop_fts"], 40);
+    o.relocalization_max_trials = read_val<int>(node["relocalization_max_trials"], 50);
+    o.poseoptim_prior_lambda = read_val<double>(node["poseoptim_prior_lambda"], 0.0);
+    o.poseoptim_using_unit_sphere = read_val<bool>(node["poseoptim_using_unit_sphere"], false);
+    o.img_align_prior_lambda_rot = read_val<double>(node["img_align_prior_lambda_rot"], 0.0);
+    o.img_align_prior_lambda_trans = read_val<double>(node["img_align_prior_lambda_trans"], 0.0);
+    o.structure_optimization_max_pts = read_val<int>(node["structure_optimization_max_pts"], 20);
+    o.init_map_scale = read_val<double>(node["map_scale"], 1.0);
+    const std::string kfselect_criterion = read_val<std::string>(node["kfselect_criterion"], "FORWARD");
     if(kfselect_criterion == "FORWARD")
         o.kfselect_criterion = KeyframeCriterion::FORWARD;
     else
         o.kfselect_criterion = KeyframeCriterion::DOWNLOOKING;
-    o.kfselect_min_dist = node["kfselect_min_dist"].as<double>(0.12);
-    o.kfselect_numkfs_upper_thresh = node["kfselect_numkfs_upper_thresh"].as<int>(120);
-    o.kfselect_numkfs_lower_thresh = node["kfselect_numkfs_lower_thresh"].as<double>(70);
-    o.kfselect_min_dist_metric = node["kfselect_min_dist_metric"].as<double>(0.01);
-    o.kfselect_min_angle = node["kfselect_min_angle"].as<double>(20);
-    o.kfselect_min_disparity = node["kfselect_min_disparity"].as<double>(40);
-    o.kfselect_min_num_frames_between_kfs = node["kfselect_min_num_frames_between_kfs"].as<int>(2);
-    o.kfselect_backend_max_time_sec = node["kfselect_backend_max_time_sec"].as<double>(3.0);
-    o.img_align_max_level = node["img_align_max_level"].as<int>(4);
-    o.img_align_min_level = node["img_align_min_level"].as<int>(2);
-    o.img_align_robustification = node["img_align_robustification"].as<bool>(false);
+    o.kfselect_min_dist = read_val<double>(node["kfselect_min_dist"], 0.12);
+    o.kfselect_numkfs_upper_thresh = read_val<int>(node["kfselect_numkfs_upper_thresh"], 120);
+    o.kfselect_numkfs_lower_thresh = read_val<int>(node["kfselect_numkfs_lower_thresh"], 70);
+    o.kfselect_min_dist_metric = read_val<double>(node["kfselect_min_dist_metric"], 0.01);
+    o.kfselect_min_angle = read_val<double>(node["kfselect_min_angle"], 20.0);
+    o.kfselect_min_disparity = read_val<double>(node["kfselect_min_disparity"], 40.0);
+    o.kfselect_min_num_frames_between_kfs = read_val<int>(node["kfselect_min_num_frames_between_kfs"], 2);
+    o.kfselect_backend_max_time_sec = read_val<double>(node["kfselect_backend_max_time_sec"], 3.0);
+    o.img_align_max_level = read_val<int>(node["img_align_max_level"], 4);
+    o.img_align_min_level = read_val<int>(node["img_align_min_level"], 2);
+    o.img_align_robustification = read_val<bool>(node["img_align_robustification"], false);
     o.img_align_use_distortion_jacobian =
-        node["img_align_use_distortion_jacobian"].as<bool>(false);
+        read_val<bool>(node["img_align_use_distortion_jacobian"], false);
     o.img_align_est_illumination_gain =
-        node["img_align_est_illumination_gain"].as<bool>(false);
+        read_val<bool>(node["img_align_est_illumination_gain"], false);
     o.img_align_est_illumination_offset =
-        node["img_align_est_illumination_offset"].as<bool>(false);
-    o.poseoptim_thresh = node["poseoptim_thresh"].as<double>(2.0);
+        read_val<bool>(node["img_align_est_illumination_offset"], false);
+    o.poseoptim_thresh = read_val<double>(node["poseoptim_thresh"], 2.0);
     o.update_seeds_with_old_keyframes =
-        node["update_seeds_with_old_keyframes"].as<bool>(true);
-    o.use_async_reprojectors = node["use_async_reprojectors"].as<bool>(false);
-    o.trace_statistics = node["trace_statistics"].as<bool>(false);
+        read_val<bool>(node["update_seeds_with_old_keyframes"], true);
+    o.use_async_reprojectors = read_val<bool>(node["use_async_reprojectors"], false);
+    // o.trace_statistics = read_val<bool>(node["trace_statistics"], false);
     o.backend_scale_stable_thresh =
-        node["backend_scale_stable_thresh"].as<double>(0.02);
+        read_val<double>(node["backend_scale_stable_thresh"], 0.02);
     o.global_map_lc_timeout_sec_ =
-        node["global_map_timeout_sec"].as<double>(2.0);
+        read_val<double>(node["global_map_timeout_sec"], 2.0);
     return o;
 }
 
 IMUHandlerOptions loadIMUHandlerOptions(const emscripten::val node) {
     IMUHandlerOptions o;
 
-    o.temporal_stationary_check = node["temporal_stationary_check"].as<bool>(false);
-    o.temporal_window_length_sec_ = node["temporal_window_length_sec"].as<double>(0.5);
-    o.stationary_acc_sigma_thresh_ = node["stationary_acc_sigma_thresh"].as<double>(10e-4);
-    o.stationary_gyr_sigma_thresh_ = node["stationary_gyr_sigma_thresh"].as<double>(6e-5);
+    o.temporal_stationary_check = read_val<bool>(node["temporal_stationary_check"], false);
+    o.temporal_window_length_sec_ = read_val<double>(node["temporal_window_length_sec"], 0.5);
+    o.stationary_acc_sigma_thresh_ = read_val<double>(node["stationary_acc_sigma_thresh"], 10e-4);
+    o.stationary_gyr_sigma_thresh_ = read_val<double>(node["stationary_gyr_sigma_thresh"], 6e-5);
 
     return o;
 }
@@ -222,14 +230,14 @@ IMUHandlerOptions loadIMUHandlerOptions(const emscripten::val node) {
 InitializationOptions loadInitializationOptions(const emscripten::val node) {
     InitializationOptions o;
 
-    o.init_min_features = node["init_min_features"].as<int>(100);
-    o.init_min_tracked = node["init_min_tracked"].as<int>(80);
-    o.init_min_inliers = node["init_min_inliers"].as<int>(70);
-    o.init_min_disparity = node["init_min_disparity"].as<double>(40.0);
-    o.init_min_features_factor = node["init_min_features_factor"].as<double>(2.0);
-    o.reproj_error_thresh = node["reproj_err_thresh"].as<double>(2.0);
-    o.init_disparity_pivot_ratio = node["init_disparity_pivot_ratio"].as<double>(0.5);
-    std::string init_method = node["init_method"].as<std::string>("FivePoint");
+    o.init_min_features = read_val<int>(node["init_min_features"], 100);
+    o.init_min_tracked = read_val<int>(node["init_min_tracked"], 80);
+    o.init_min_inliers = read_val<int>(node["init_min_inliers"], 70);
+    o.init_min_disparity = read_val<double>(node["init_min_disparity"], 40.0);
+    o.init_min_features_factor = read_val<double>(node["init_min_features_factor"], 2.0);
+    o.reproj_error_thresh = read_val<double>(node["reproj_err_thresh"], 2.0);
+    o.init_disparity_pivot_ratio = read_val<double>(node["init_disparity_pivot_ratio"], 0.5);
+    const std::string init_method = read_val<std::string>(node["init_method"], "FivePoint");
     if(init_method == "Homography")
         o.init_type = InitializerType::kHomography;
     else if(init_method == "TwoPoint")
@@ -247,30 +255,30 @@ InitializationOptions loadInitializationOptions(const emscripten::val node) {
 ReprojectorOptions loadReprojectorOptions(const emscripten::val node) {
     ReprojectorOptions o;
 
-    o.max_n_kfs = node["reprojector_max_n_kfs"].as<int>(5);
-    o.max_n_features_per_frame = node["max_fts"].as<int>(160);
-    o.cell_size = node["grid_size"].as<int>(35);
+    o.max_n_kfs = read_val<int>(node["reprojector_max_n_kfs"], 5);
+    o.max_n_features_per_frame = read_val<int>(node["max_fts"], 160);
+    o.cell_size = read_val<int>(node["grid_size"], 35);
     o.reproject_unconverged_seeds =
-        node["reproject_unconverged_seeds"].as<bool>(true);
+        read_val<bool>(node["reproject_unconverged_seeds"], true);
     o.max_unconverged_seeds_ratio =
-        node["max_unconverged_seeds_ratio"].as<double>(-1.0);
+        read_val<double>(node["max_unconverged_seeds_ratio"], -1.0);
     o.min_required_features =
-        node["quality_min_fts"].as<int>(50);
+        read_val<int>(node["quality_min_fts"], 50);
     o.seed_sigma2_thresh =
-        node["seed_convergence_sigma2_thresh"].as<double>(200.0);
+        read_val<double>(node["seed_convergence_sigma2_thresh"], 200.0);
 
     o.affine_est_offset =
-        node["reprojector_affine_est_offset"].as<bool>(true);
+        read_val<bool>(node["reprojector_affine_est_offset"], true);
     o.affine_est_gain =
-        node["reprojector_affine_est_gain"].as<bool>(false);
+        read_val<bool>(node["reprojector_affine_est_gain"], false);
     o.max_fixed_landmarks =
-        node["reprojector_max_fixed_landmarks"].as<int>(50);
+        read_val<int>(node["reprojector_max_fixed_landmarks"], 50);
     o.max_n_global_kfs =
-        node["reprojector_max_n_global_kfs"].as<int>(20);
+        read_val<int>(node["reprojector_max_n_global_kfs"], 20);
     o.use_kfs_from_global_map =
-        node["reprojector_use_kfs_from_global_map"].as<bool>(false);
+        read_val<bool>(node["reprojector_use_kfs_from_global_map"], false);
     o.fixed_lm_grid_size =
-        node["reprojector_fixed_lm_grid_size"].as<int>(50);
+        read_val<int>(node["reprojector_fixed_lm_grid_size"], 50);
 
     return o;
 }
@@ -278,10 +286,10 @@ ReprojectorOptions loadReprojectorOptions(const emscripten::val node) {
 StereoTriangulationOptions loadStereoTriangulationOptions(const emscripten::val node) {
     StereoTriangulationOptions o;
 
-    o.triangulate_n_features = node["max_fts"].as<int>(120);
-    o.max_depth_inv = node["max_depth_inv"].as<double>(1.0/50.0);
-    o.min_depth_inv = node["min_depth_inv"].as<double>(1.0/0.5);
-    o.mean_depth_inv = node["mean_depth_inv"].as<double>(1.0/2.0);
+    o.triangulate_n_features = read_val<int>(node["max_fts"], 120);
+    o.max_depth_inv = read_val<double>(node["max_depth_inv"], 1.0/50.0);
+    o.min_depth_inv = read_val<double>(node["min_depth_inv"], 1.0/0.5);
+    o.mean_depth_inv = read_val<double>(node["mean_depth_inv"], 1.0/2.0);
 
     return o;
 }
@@ -289,24 +297,24 @@ StereoTriangulationOptions loadStereoTriangulationOptions(const emscripten::val 
 DepthFilterOptions loadDepthFilterOptions(const emscripten::val node) {
     DepthFilterOptions o;
 
-    o.max_search_level = node["n_pyr_levels"].as<int>(3) - 1;
+    o.max_search_level = read_val<int>(node["n_pyr_levels"], 3) - 1;
     o.use_threaded_depthfilter =
-        node["use_threaded_depthfilter"].as<bool>(true);
+        read_val<bool>(node["use_threaded_depthfilter"], true);
     o.seed_convergence_sigma2_thresh =
-        node["seed_convergence_sigma2_thresh"].as<double>(200.0);
+        read_val<double>(node["seed_convergence_sigma2_thresh"], 200.0);
     o.mappoint_convergence_sigma2_thresh =
-        node["mappoint_convergence_sigma2_thresh"].as<double>(500.0);
-    o.scan_epi_unit_sphere = node["scan_epi_unit_sphere"].as<bool>(false);
-    o.affine_est_offset= node["depth_filter_affine_est_offset"].as<bool>(true);
-    o.affine_est_gain = node["depth_filter_affine_est_gain"].as<bool>(false);
+        read_val<double>(node["mappoint_convergence_sigma2_thresh"], 500.0);
+    o.scan_epi_unit_sphere = read_val<bool>(node["scan_epi_unit_sphere"], false);
+    o.affine_est_offset= read_val<bool>(node["depth_filter_affine_est_offset"], true);
+    o.affine_est_gain = read_val<bool>(node["depth_filter_affine_est_gain"], false);
     o.max_n_seeds_per_frame = static_cast<size_t>(
-            static_cast<double>(node["max_fts"].as<int>(120))
-            * node["max_seeds_ratio"].as<double>(3.0));
+            static_cast<double>(read_val<int>(node["max_fts"], 120))
+            * read_val<double>(node["max_seeds_ratio"], 3.0));
     o.max_map_seeds_per_frame = static_cast<size_t>(
-            static_cast<double>(node["max_map_fts"].as<int>(120)));
+            static_cast<double>(read_val<int>(node["max_map_fts"], 120)));
     o.extra_map_points =
-        node["depth_filter_extra_map_points"].as<bool>(false);
-    if(node["runlc"].as<bool>(false) && !o.extra_map_points)
+        read_val<bool>(node["depth_filter_extra_map_points"], false);
+    if(read_val<bool>(node["runlc"], false) && !o.extra_map_points)
     {
         LOG(WARNING) << "Loop closure requires extra map points, "
                     << " but the option is not set, overriding to true.";
@@ -319,12 +327,12 @@ DepthFilterOptions loadDepthFilterOptions(const emscripten::val node) {
 
 DetectorOptions loadDetectorOptions(const emscripten::val node) {
     DetectorOptions o;
-    o.cell_size = node["grid_size"].as<int>(35);
-    o.max_level = node["n_pyr_levels"].as<int>(3) - 1;
-    o.threshold_primary = node["detector_threshold_primary"].as<int>(10);
-    o.threshold_secondary = node["detector_threshold_secondary"].as<int>(200);
-    o.threshold_shitomasi = node["detector_threshold_shitomasi"].as<int>(100);
-    if(node["use_edgelets"].as<bool>(true))
+    o.cell_size = read_val<int>(node["grid_size"], 35);
+    o.max_level = read_val<int>(node["n_pyr_levels"], 3) - 1;
+    o.threshold_primary = read_val<int>(node["detector_threshold_primary"], 10);
+    o.threshold_secondary = read_val<int>(node["detector_threshold_secondary"], 200);
+    o.threshold_shitomasi = read_val<int>(node["detector_threshold_shitomasi"], 100);
+    if(read_val<bool>(node["use_edgelets"], true))
         o.detector_type = DetectorType::kFastGrad;
     else
         o.detector_type = DetectorType::kFast;
@@ -334,8 +342,8 @@ DetectorOptions loadDetectorOptions(const emscripten::val node) {
 FeatureTrackerOptions loadFeatureTrackerOptions(const emscripten::val node) {
     FeatureTrackerOptions o;
 
-    o.klt_max_level = node["klt_max_level"].as<int>(4);
-    o.klt_min_level = node["klt_min_level"].as<int>(0);
+    o.klt_max_level = read_val<int>(node["klt_max_level"], 4);
+    o.klt_min_level = read_val<int>(node["klt_min_level"], 0);
 
     return o;
 }
@@ -344,9 +352,9 @@ Odometry::Odometry(
     const emscripten::val calib,
     const emscripten::val config  
 ) {
-    imwidth_ = calib["width"].as<uint32_t>();
-    imheight_ = calib["height"].as<uint32_t>();
-    const bool use_imu = calib["use_imu"].as<bool>(false);
+    imwidth_ = read_val<uint32_t>(calib["width"]);
+    imheight_ = read_val<uint32_t>(calib["height"]);
+    const bool use_imu = read_val<bool>(calib["use_imu"], false);
 
     auto camera = makeCamera(calib);
     frame_handler_ = makeMono(camera, config);
@@ -407,7 +415,7 @@ bool Odometry::_set_imu_prior(const uint64_t timestamp) const{
             (double)timestamp * common::conversions::kNanoSecondsToSeconds,
             R_imu_world
         )) {
-            VLOG(3) << "Set initial orientation from accelerometer measurements.";
+            // VLOG(3) << "Set initial orientation from accelerometer measurements.";
             vo->setRotationPrior(R_imu_world);
         } else {
             return false;
@@ -420,7 +428,7 @@ bool Odometry::_set_imu_prior(const uint64_t timestamp) const{
             timestamp * common::conversions::kNanoSecondsToSeconds,
             false, R_lastimu_newimu
         )) {
-        VLOG(3) << "Set incremental rotation prior from IMU.";
+        // VLOG(3) << "Set incremental rotation prior from IMU.";
         vo->setRotationIncrementPrior(R_lastimu_newimu);
         }
     }
@@ -444,7 +452,7 @@ void Odometry::addImageBundle(
 ) const {
     const uint64_t timestamp_u64 = timestamp.as<uint64_t>();
     if(!_set_imu_prior(timestamp_u64)){
-        VLOG(3) << "Could not align gravity! Attempting again in next iteration.";
+        // VLOG(3) << "Could not align gravity! Attempting again in next iteration.";
         return;
     }
     cv::Mat img = _emscripten_arraybuffer_to_cvmat(arraybuffer);
@@ -473,17 +481,20 @@ void Odometry::addImuMeasurement(
 EMSCRIPTEN_BINDINGS(svojs)
 {
     emscripten::constant("S_INIT", Stage::kInitializing);
-    emscripten::constant("S_PASUE", Stage::kPaused);
+    emscripten::constant("S_PASUED", Stage::kPaused);
     emscripten::constant("S_TRACK", Stage::kTracking);
     emscripten::constant("S_RELOC", Stage::kRelocalization);
 
     emscripten::class_<Odometry>("Odometry")
         .constructor<emscripten::val, emscripten::val>()
         
-        .property("stage", &Odometry::stage)
+        .property("state", &Odometry::stage)
         .property("width", &Odometry::imwidth)
         .property("height", &Odometry::imheight)
 
         .function("start", &Odometry::start)
-        .function("getViewPose", &Odometry::world_viewpose_gl)
+        .function("addImage", &Odometry::addImageBundle, emscripten::allow_raw_pointers())
+        .function("addMotion", &Odometry::addImuMeasurement, emscripten::allow_raw_pointers())
+        .function("getGLPose", &Odometry::world_pose_gl)
+        .function("getViewPose", &Odometry::world_viewpose_gl);
 }

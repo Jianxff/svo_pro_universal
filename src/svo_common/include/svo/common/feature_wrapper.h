@@ -65,8 +65,8 @@ struct FeatureWrapper
   ~FeatureWrapper() = default;
 
   //! @todo (MWE) do copy and copy-asignment operators make sense?
-  FeatureWrapper(const FeatureWrapper& other) = default;
-  FeatureWrapper& operator=(const FeatureWrapper& other) = default;
+  FeatureWrapper(const FeatureWrapper& other) = delete;
+  FeatureWrapper& operator=(const FeatureWrapper& other) = delete;
 };
 
 } // namespace svo

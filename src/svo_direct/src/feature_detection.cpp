@@ -12,7 +12,7 @@
 #include <fast/fast.h>
 #include <vikit/vision.h>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 #include <aslam/common/memory.h>
 #include <svo/common/frame.h>
 #include <svo/common/camera.h>

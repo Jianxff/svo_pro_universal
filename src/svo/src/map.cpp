@@ -98,7 +98,7 @@ void Map::emptyPointsTrash()
 
 void Map::addKeyframe(const FramePtr& new_keyframe, bool temporal_map)
 {
-  VLOG(100) << "Adding keyframe to map. Frame-Id = " << new_keyframe->id();
+  // VLOG(100) << "Adding keyframe to map. Frame-Id = " << new_keyframe->id();
 
   keyframes_.insert(std::make_pair(new_keyframe->id(), new_keyframe));
   last_added_kf_id_ = new_keyframe->id();
@@ -112,7 +112,7 @@ void Map::getOverlapKeyframes(
     const FramePtr& frame,
     std::vector<std::pair<FramePtr, double>>* close_kfs) const
 {
-  CHECK_NOTNULL(close_kfs);
+  // CHECK_NOTNULL(close_kfs);
   for(const auto& kf : keyframes_)
   {
     // check first if Point is visible in the Keyframe, use therefore KeyPoints
@@ -137,7 +137,7 @@ void Map::getClosestNKeyframesWithOverlap(
     const size_t num_frames,
     std::vector<FramePtr>* close_kfs) const
 {
-  CHECK_NOTNULL(close_kfs);
+  // CHECK_NOTNULL(close_kfs);
   std::vector<std::pair<FramePtr, double>> overlap_kfs;
   getOverlapKeyframes(cur_frame, &overlap_kfs);
   if(overlap_kfs.empty())
@@ -159,7 +159,7 @@ void Map::getClosestNKeyframesWithOverlap(
 
 FramePtr Map::getClosestKeyframe(const FramePtr& frame) const
 {
-  CHECK_NOTNULL(frame.get());
+  // CHECK_NOTNULL(frame.get());
   std::vector<std::pair<FramePtr, double>> close_kfs;
   getOverlapKeyframes(frame, &close_kfs);
   if(close_kfs.empty())
@@ -224,7 +224,7 @@ void Map::transform(const Matrix3d& R, const Vector3d& t, const double& s)
     Vector3d pos = s*R*kf.second->pos() + t;
     Matrix3d rot = R*kf.second->T_f_w_.getRotation().inverse().getRotationMatrix();
     kf.second->T_f_w_ = Transformation(Quaternion(rot), pos).inverse();
-    CHECK(false);
+    // CHECK(false);
     /* TODO(cfo)
     for(const auto& ftr : kf.second->fts_)
     {
@@ -244,14 +244,14 @@ void Map::checkDataConsistency() const
     const FramePtr& frame = kf.second;
 
     // check that feature-stuff has all same length
-    CHECK_EQ(frame->px_vec_.cols(), frame->f_vec_.cols());
-    CHECK_EQ(frame->px_vec_.cols(), frame->level_vec_.size());
-    CHECK_EQ(frame->px_vec_.cols(), frame->grad_vec_.cols());
-    CHECK_EQ(static_cast<size_t>(frame->px_vec_.cols()), frame->type_vec_.size());
-    CHECK_EQ(static_cast<size_t>(frame->px_vec_.cols()), frame->landmark_vec_.size());
-    CHECK_EQ(static_cast<size_t>(frame->px_vec_.cols()), frame->seed_ref_vec_.size());
-    CHECK_EQ(frame->px_vec_.cols(), frame->invmu_sigma2_a_b_vec_.cols());
-    CHECK_LE(frame->num_features_, static_cast<size_t>(frame->px_vec_.cols()));
+    // CHECK_EQ(frame->px_vec_.cols(), frame->f_vec_.cols());
+    // CHECK_EQ(frame->px_vec_.cols(), frame->level_vec_.size());
+    // CHECK_EQ(frame->px_vec_.cols(), frame->grad_vec_.cols());
+    // CHECK_EQ(static_cast<size_t>(frame->px_vec_.cols()), frame->type_vec_.size());
+    // CHECK_EQ(static_cast<size_t>(frame->px_vec_.cols()), frame->landmark_vec_.size());
+    // CHECK_EQ(static_cast<size_t>(frame->px_vec_.cols()), frame->seed_ref_vec_.size());
+    // CHECK_EQ(frame->px_vec_.cols(), frame->invmu_sigma2_a_b_vec_.cols());
+    // CHECK_LE(frame->num_features_, static_cast<size_t>(frame->px_vec_.cols()));
 
     // check features
     for(size_t i = 0; i < frame->num_features_; ++i)
@@ -266,16 +266,16 @@ void Map::checkDataConsistency() const
           {
             ++ref_count;
             const FramePtr obs_frame = o.frame.lock();
-            CHECK_EQ(obs_frame.get(), frame.get());
+            // CHECK_EQ(obs_frame.get(), frame.get());
           }
         }
-        CHECK_EQ(ref_count, 1u);
+        // CHECK_EQ(ref_count, 1u);
       }
 
-      CHECK((isSeed(frame->type_vec_[i]) && frame->landmark_vec_[i] == nullptr)
-            || !isSeed(frame->type_vec_[i]));
-      CHECK(frame->seed_ref_vec_[i].keyframe == nullptr);
-      CHECK(frame->seed_ref_vec_[i].seed_id == -1);
+      // CHECK((isSeed(frame->type_vec_[i]) && frame->landmark_vec_[i] == nullptr)
+            // || !isSeed(frame->type_vec_[i]));
+      // CHECK(frame->seed_ref_vec_[i].keyframe == nullptr);
+      // CHECK(frame->seed_ref_vec_[i].seed_id == -1);
     }
   }
 }

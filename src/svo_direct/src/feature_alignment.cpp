@@ -15,9 +15,9 @@
 # include <arm_neon.h>
 #endif
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 #include <Eigen/Dense>
-#include <opencv2/highgui/highgui.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <svo/direct/patch_utils.h>
 
@@ -39,7 +39,7 @@ bool align1D(
     Keypoint* cur_px_estimate,
     double* h_inv)
 {
-  CHECK_NOTNULL(cur_px_estimate);
+  // CHECK_NOTNULL(cur_px_estimate);
 
   constexpr int kHalfPatchSize = 4;
   constexpr int kPatchSize = 2 * kHalfPatchSize;
@@ -172,11 +172,11 @@ bool align1D(
     mean_diff += update[1];
     alpha += update[2];
 
-    VLOG(300) << "It. " << iter << ": \t"
-              << "\t u=" << u << ", v=" << v
-              << "\t update = "
-              << update[0] << ", " << update[1] << ", " << update[2]
-              << "\t new chi2 = " << new_chi2;
+    // VLOG(300) << "It. " << iter << ": \t"
+              // << "\t u=" << u << ", v=" << v
+              // << "\t update = "
+              // << update[0] << ", " << update[1] << ", " << update[2]
+              // << "\t new chi2 = " << new_chi2;
 
     #if SVO_DISPLAY_ALIGN_1D
     cv::Mat res_patch_normalized, cur_patch_normalized, ref_patch_img, ref_patch_normalized;
@@ -198,7 +198,7 @@ bool align1D(
 
     if(update[0]*update[0] < min_update_squared)
     {
-      VLOG(300) << "converged.";
+      // VLOG(300) << "converged.";
       converged = true;
       break;
     }
@@ -786,8 +786,8 @@ bool alignPyr2D(
   for(int level = max_level; level >= min_level; --level)
   {
     const int patch_size = patch_sizes[level];
-    CHECK(patch_size % 8 == 0)
-        << ": alignPyr2D is only made for patch sizes multiples of 8!";
+    // CHECK(patch_size % 8 == 0)
+        // << ": alignPyr2D is only made for patch sizes multiples of 8!";
     const int halfpatch_size = patch_size/2;
     const int scale = (1<<level);
     const cv::Mat& img_ref = img_pyr_ref[level];

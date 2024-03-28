@@ -20,8 +20,8 @@ void Pgo::addPoseToPgoProblem(const Transformation t, const int frame_id)
   }
   else
   {
-    VLOG(40) << "###### Warning: Problem is locked, not adding any poses "
-                "#########";
+    // VLOG(40) << "###### Warning: Problem is locked, not adding any poses "
+                // "#########";
   }
 }
 
@@ -56,7 +56,7 @@ void Pgo::addSequentialConstraintToPgoProblem(const Transformation t_be,
   Eigen::Matrix<double, 6, 6> sqrt_information;
   if (searchKfIdInQueue(frame_id_e))
   {
-    VLOG(40) << "Frame Id " << frame_id_e << " added with low weight ";
+    // VLOG(40) << "Frame Id " << frame_id_e << " added with low weight ";
     sqrt_information = constraint.information.llt().matrixL();
     sqrt_information *= 0.0000001;
   }
@@ -75,8 +75,8 @@ void Pgo::addSequentialConstraintToPgoProblem(const Transformation t_be,
         pose_end_iter->second.p.data(),
         pose_end_iter->second.q.coeffs().data());
     seq_constraint_ids_.push_back(res);
-    VLOG(40) << "Sequential constraint added for frame " << constraint.id_begin
-             << " and " << constraint.id_end;
+    // VLOG(40) << "Sequential constraint added for frame " << constraint.id_begin
+            //  << " and " << constraint.id_end;
     problem_.SetParameterization(pose_begin_iter->second.q.coeffs().data(),
                                  quaternion_local_parameterization_);
     problem_.SetParameterization(pose_end_iter->second.q.coeffs().data(),
@@ -84,8 +84,8 @@ void Pgo::addSequentialConstraintToPgoProblem(const Transformation t_be,
   }
   else
   {
-    VLOG(20) << "###### Warning: Problem is locked, not adding any sequential "
-                "constraints #########";
+    // VLOG(20) << "###### Warning: Problem is locked, not adding any sequential "
+                // "constraints #########";
   }
 }
 
@@ -130,8 +130,8 @@ void Pgo::addLoopConstraintToPgoProblem(const Transformation t_be,
         pose_end_iter->second.p.data(),
         pose_end_iter->second.q.coeffs().data());
 
-    VLOG(40) << "Loop constraint added for frame " << constraint.id_begin
-             << " and " << constraint.id_end;
+    // VLOG(40) << "Loop constraint added for frame " << constraint.id_begin
+            //  << " and " << constraint.id_end;
     problem_.SetParameterization(pose_begin_iter->second.q.coeffs().data(),
                                  quaternion_local_parameterization_);
     problem_.SetParameterization(pose_end_iter->second.q.coeffs().data(),
@@ -141,12 +141,12 @@ void Pgo::addLoopConstraintToPgoProblem(const Transformation t_be,
     problem_.SetParameterBlockConstant(pose_begin_iter->second.p.data());
     problem_.SetParameterBlockConstant(
         pose_begin_iter->second.q.coeffs().data());
-    VLOG(40) << "Beginning to Re-optimize Pose Graph";
+    // VLOG(40) << "Beginning to Re-optimize Pose Graph";
     ceres::Solve(options_, &problem_, &summary_);
-    VLOG(10) << summary_.FullReport();
+    // VLOG(10) << summary_.FullReport();
     opt_timing_.push_back(summary_.total_time_in_seconds);
     num_nodes_.push_back(summary_.num_parameter_blocks);
-    VLOG(40) << "Re-Optimization Complete";
+    // VLOG(40) << "Re-Optimization Complete";
     problem_.SetParameterBlockVariable(pose_begin_iter->second.p.data());
     problem_.SetParameterBlockVariable(
         pose_begin_iter->second.q.coeffs().data());
@@ -156,8 +156,8 @@ void Pgo::addLoopConstraintToPgoProblem(const Transformation t_be,
   }
   else
   {
-    VLOG(20) << "###### Warning: Problem is locked, not adding any loop "
-                "constraints #########";
+    // VLOG(20) << "###### Warning: Problem is locked, not adding any loop "
+                // "constraints #########";
   }
 }
 
@@ -191,11 +191,11 @@ void Pgo::addConstraint(const Transformation& t_be, const int& frame_id_b,
 
   ceres::MapOfPoses::iterator pose_begin_iter =
       poses_->find(constraint.id_begin);
-  CHECK(pose_begin_iter != poses_->end())
-      << "Pose with ID: " << constraint.id_begin << " not found.";
+  // CHECK(pose_begin_iter != poses_->end())
+      // << "Pose with ID: " << constraint.id_begin << " not found.";
   ceres::MapOfPoses::iterator pose_end_iter = poses_->find(constraint.id_end);
-  CHECK(pose_end_iter != poses_->end())
-      << "Pose with ID: " << constraint.id_end << " not found.";
+  // CHECK(pose_end_iter != poses_->end())
+      // << "Pose with ID: " << constraint.id_end << " not found.";
   const Eigen::Matrix<double, 6, 6> sqrt_information =
       constraint.information.llt().matrixL();
   // Ceres will take ownership of the pointer.
@@ -205,8 +205,8 @@ void Pgo::addConstraint(const Transformation& t_be, const int& frame_id_b,
       cost_function, loss_function_, pose_begin_iter->second.p.data(),
       pose_begin_iter->second.q.coeffs().data(), pose_end_iter->second.p.data(),
       pose_end_iter->second.q.coeffs().data());
-  VLOG(40) << "Sequential constraint added for frame " << constraint.id_begin
-           << " and " << constraint.id_end;
+  // VLOG(40) << "Sequential constraint added for frame " << constraint.id_begin
+          //  << " and " << constraint.id_end;
   problem_.SetParameterization(pose_begin_iter->second.q.coeffs().data(),
                                quaternion_local_parameterization_);
   problem_.SetParameterization(pose_end_iter->second.q.coeffs().data(),
@@ -216,11 +216,11 @@ void Pgo::addConstraint(const Transformation& t_be, const int& frame_id_b,
 void Pgo::solve()
 {
   ceres::MapOfPoses::iterator pose_start_iter = poses_->begin();
-  CHECK(pose_start_iter != poses_->end()) << "There are no poses.";
+  // CHECK(pose_start_iter != poses_->end()) << "There are no poses.";
   problem_.SetParameterBlockConstant(pose_start_iter->second.p.data());
   problem_.SetParameterBlockConstant(pose_start_iter->second.q.coeffs().data());
   ceres::Solve(options_, &problem_, &summary_);
-  VLOG(10) << summary_.FullReport();
+  // VLOG(10) << summary_.FullReport();
 }
 
 bool Pgo::searchKfIdInQueue(int id)

@@ -26,7 +26,7 @@ class RealtimeWorker
   {
     if (!thread_.joinable())
     {
-      LOG(WARNING) << "Redundant shutdown call of real-time worker!";
+      // LOG(WARNING) << "Redundant shutdown call of real-time worker!";
       return;
     }
     queue_.shutdown();

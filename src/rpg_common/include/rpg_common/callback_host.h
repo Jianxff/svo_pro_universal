@@ -3,7 +3,7 @@
 #include <functional>
 #include <unordered_set>
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 #include "rpg_common/batch_worker.h"
 #include "rpg_common/realtime_worker.h"
@@ -45,7 +45,7 @@ class CallbackHost
     {
       callback(args...);
     }
-    VLOG(40) << callbacks_.size() << " callbacks processed.";
+    // // VLOG(40) << callbacks_.size() << " callbacks processed.";
   }
  private:
   std::unordered_set<Callback> callbacks_;

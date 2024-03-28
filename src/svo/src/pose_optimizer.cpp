@@ -39,8 +39,8 @@ void PoseOptimizer::setRotationPrior(const Quaternion& R_frame_world, double lam
 
 size_t PoseOptimizer::run(const FrameBundle::Ptr& frame_bundle, double reproj_thresh_px)
 {
-  CHECK(!frame_bundle->empty()) << "PoseOptimizer: FrameBundle is empty";
-  CHECK_GT(frame_bundle->numFeatures(), 0u) << "PoseOptimizer: No features in frames";
+  // CHECK(!frame_bundle->empty()) << "PoseOptimizer: FrameBundle is empty";
+  // CHECK_GT(frame_bundle->numFeatures(), 0u) << "PoseOptimizer: No features in frames";
 
   focal_length_ = frame_bundle->at(0)->getErrorMultiplier();
   frame_bundle_ = frame_bundle;
@@ -50,7 +50,7 @@ size_t PoseOptimizer::run(const FrameBundle::Ptr& frame_bundle, double reproj_th
   std::vector<float> start_errors;
   evaluateErrorImpl(T_imu_world, nullptr, nullptr, &start_errors);
   measurement_sigma_ = scale_estimator_.compute(start_errors);
-  VLOG(5) << "Initial measurement sigma:" << measurement_sigma_;
+  // VLOG(5) << "Initial measurement sigma:" << measurement_sigma_;
 
   // Run Gauss Newton optimization.
   optimize(T_imu_world);
@@ -69,9 +69,9 @@ size_t PoseOptimizer::run(const FrameBundle::Ptr& frame_bundle, double reproj_th
                    &final_errors, &n_deleted_edges, &n_deleted_corners);
   }
 
-  VLOG(5) <<"PoseOptimzer: drop " << n_deleted_corners << " corner outliers and "
-          << n_deleted_edges << " edgelet outliers out of "
-          << n_meas_ << " measurements.";
+  // VLOG(5) <<"PoseOptimzer: drop " << n_deleted_corners << " corner outliers and "
+          // << n_deleted_edges << " edgelet outliers out of "
+          // << n_meas_ << " measurements.";
 
   // TODO(zzc): for bearing vector difference, can we also save errors in pixels?
   // save statistics
@@ -182,7 +182,7 @@ double PoseOptimizer::evaluateErrorImpl(
       }
       if(unwhitened_errors)
       {
-        CHECK_GE(unwhitened_error, 0.0);
+        // CHECK_GE(unwhitened_error, 0.0);
         unwhitened_errors->push_back(unwhitened_error / scale);
       }
       chi2_error_sum += chi2_error;
@@ -200,10 +200,10 @@ void PoseOptimizer::removeOutliers(
     std::size_t* n_deleted_edges,
     std::size_t* n_deleted_corners)
 {
-  CHECK_NOTNULL(frame);
-  CHECK_NOTNULL(reproj_errors);
-  CHECK_NOTNULL(n_deleted_edges);
-  CHECK_NOTNULL(n_deleted_corners);
+  // CHECK_NOTNULL(frame);
+  // CHECK_NOTNULL(reproj_errors);
+  // CHECK_NOTNULL(n_deleted_edges);
+  // CHECK_NOTNULL(n_deleted_corners);
 
   // calculate threhold for once
   static double threshold_uplane = reproj_err_threshold / focal_length_;

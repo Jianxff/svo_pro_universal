@@ -13,7 +13,7 @@ template <typename Scalar>
 QuatSimTransformTemplate<Scalar>::QuatSimTransformTemplate(
     const Transform& T_A_B, const Scalar scale_A_B)
     : T_A_B_(T_A_B), scale_A_B_(scale_A_B) {
-  CHECK_GT(scale_A_B, 0.);
+  // CHECK_GT(scale_A_B, 0.);
 }
 
 template <typename Scalar>
@@ -21,7 +21,7 @@ QuatSimTransformTemplate<Scalar>::QuatSimTransformTemplate(
     const Vector7& log_vector)
     : T_A_B_(Eigen::Matrix<Scalar, 6, 1>(log_vector.template head<6>())),
       scale_A_B_(log_vector(6)) {
-  CHECK_GT(scale_A_B_, 0.);
+  // CHECK_GT(scale_A_B_, 0.);
 }
 
 template <typename Scalar>

@@ -78,8 +78,8 @@ inline FloatType getMeanFromDepth(FloatType depth)
 
 inline FloatType getMeanRangeFromDepthMinMax(FloatType depth_min, FloatType depth_max)
 {
-  CHECK_GE(depth_max, 0.0);
-  CHECK_GE(depth_min, 0.0);
+  // CHECK_GE(depth_max, 0.0);
+  // CHECK_GE(depth_min, 0.0);
   return (std::log(depth_max) - std::log(depth_min))*2.0;
 }
 

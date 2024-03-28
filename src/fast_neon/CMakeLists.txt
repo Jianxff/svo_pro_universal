@@ -4,7 +4,7 @@ target_sources(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/src/fast_9.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/fast_10.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/fast_10_score.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/faster_corner_10_sse.cpp
+        # ${CMAKE_CURRENT_SOURCE_DIR}/src/faster_corner_10_sse.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/nonmax_3x3.cpp
 )
 

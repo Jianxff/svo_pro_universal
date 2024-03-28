@@ -5,7 +5,7 @@
 #include <queue>
 #include <vector>
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace rpg_common {
 
@@ -136,7 +136,7 @@ class ThreadSafeQueue
     CHECK_NOTNULL(lock);
     if (warn_if_has_backlog_ && !data_.empty())
     {
-      LOG(WARNING) << "Backlog in queue \"" << backlog_warn_tag_ << "\"";
+      // LOG(WARNING) << "Backlog in queue \"" << backlog_warn_tag_ << "\"";
     }
     cv_push_.wait(
         *lock, [this] { return !data_.empty() || shutdown_; });

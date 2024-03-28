@@ -53,7 +53,7 @@ svo::FeatureTrackerOptions
 
 /// Factory for Mono-SVO.
 std::shared_ptr<svo::FrameHandlerMono> makeMono(
-    const CameraBundlePtr& cam,
+    const svo::CameraBundlePtr& cam,
     const emscripten::val config
 );
 
@@ -81,7 +81,7 @@ public:
 
     void start() const;
 
-    const Stage stage() const;
+    const svo::Stage stage() const;
     const uint32_t imwidth() const;
     const uint32_t imheight() const;
 
@@ -107,8 +107,8 @@ private:
     uint32_t imwidth_;
     uint32_t imheight_;
 
-    ImuHandlerPtr imu_handler_;
-    FrameHandlerMono::Ptr frame_handler_;
+    svo::ImuHandlerPtr imu_handler_;
+    svo::FrameHandlerMono::Ptr frame_handler_;
 
     bool set_initial_attitude_from_gravity_ = true;
 };

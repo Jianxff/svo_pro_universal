@@ -1,6 +1,6 @@
 #include "vikit/cameras/equidistant_fisheye_projection.h"
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace vk {
 namespace cameras {
@@ -10,14 +10,14 @@ EquidistantFisheyeProjection::EquidistantFisheyeProjection(
     double focal_length, Eigen::Vector2d principal_point)
 : focal_length_(focal_length), principal_point_(principal_point)
 {
-  CHECK_NE(focal_length_, 0.);
+  // CHECK_NE(focal_length_, 0.);
 }
 
 bool EquidistantFisheyeProjection::backProject3(
     const Eigen::Ref<const Eigen::Vector2d>& keypoint,
     Eigen::Vector3d* out_bearing_vector) const
 {
-  CHECK_NOTNULL(out_bearing_vector);
+  // CHECK_NOTNULL(out_bearing_vector);
 
   constexpr double kEpsilon = 1e-10;
   Eigen::Vector2d p_c = keypoint - principal_point_;
@@ -41,7 +41,7 @@ void EquidistantFisheyeProjection::project3(
     Eigen::Vector2d* out_keypoint,
     Eigen::Matrix<double, 2, 3>* out_jacobian_point) const
 {
-  CHECK_NOTNULL(out_keypoint);
+  // CHECK_NOTNULL(out_keypoint);
 
   const double kEpsilon = 1e-10;
 
@@ -56,7 +56,7 @@ void EquidistantFisheyeProjection::project3(
   const double xyz_norm2 = xy_norm2 + std::pow(z,2);
   const double xyz_norm = std::sqrt(xyz_norm2);
 
-  CHECK_GE(xyz_norm, kEpsilon);
+  // CHECK_GE(xyz_norm, kEpsilon);
 
   double theta;
   if(fabs(xy_norm) < kEpsilon)

@@ -10,7 +10,7 @@
 
 // svo
 #include <svo/global.h>
-#include <svo/vio_common/backend_types.hpp>
+// #include <svo/vio_common/backend_types.hpp>
 
 // forward declarations
 class Transformation;
@@ -86,7 +86,7 @@ public:
 
   virtual BundleId lastOptimizedBundleId() const = 0;
 
-  virtual void getLastState(ViNodeState* state) const = 0;
+  // virtual void getLastState(ViNodeState* state) const = 0;
 
 protected:
   BundleAdjustmentType type_ = BundleAdjustmentType::kNone;

@@ -56,7 +56,7 @@ namespace svo
 {
 
 // definition of global and static variables which were declared in the header
-PerformanceMonitorPtr g_permon;
+// PerformanceMonitorPtr g_permon;
 
 const std::unordered_map<svo::Stage, std::string, EnumClassHash> kStageName
 {{Stage::kPaused, "Paused"}, {Stage::kInitializing, "Initializing"},
@@ -82,42 +82,43 @@ FrameHandlerBase::FrameHandlerBase(const BaseOptions& base_options, const Reproj
         0)
 {
   // sanity checks
-  CHECK_EQ(reprojector_options.cell_size, detector_options.cell_size);
+  // CHECK_EQ(reprojector_options.cell_size, detector_options.cell_size);
 
   need_new_kf_ = std::bind(&FrameHandlerBase::needNewKf, this, std::placeholders::_1);
 
-  if (options_.trace_statistics)
-  {
-    // Initialize Performance Monitor
-    g_permon.reset(new vk::PerformanceMonitor());
-    g_permon->addTimer("pyramid_creation");
-    g_permon->addTimer("sparse_img_align");
-    g_permon->addTimer("reproject");
-    g_permon->addTimer("reproject_kfs");
-    g_permon->addTimer("reproject_candidates");
-    g_permon->addTimer("feature_align");
-    g_permon->addTimer("pose_optimizer");
-    g_permon->addTimer("point_optimizer");
-    g_permon->addTimer("local_ba");
-    g_permon->addTimer("frontend_time");
-    g_permon->addLog("timestamp");
-    g_permon->addLog("img_align_n_tracked");
-    g_permon->addLog("repr_n_matches_local_map");
-    g_permon->addLog("repr_n_trials_local_map");
-    g_permon->addLog("repr_n_matches_global_map");
-    g_permon->addLog("repr_n_trials_global_map");
-    g_permon->addLog("sfba_thresh");
-    g_permon->addLog("sfba_error_init");
-    g_permon->addLog("sfba_error_final");
-    g_permon->addLog("sfba_n_edges_final");
-    g_permon->addLog("loba_n_erredges_init");
-    g_permon->addLog("loba_n_erredges_fin");
-    g_permon->addLog("loba_err_init");
-    g_permon->addLog("loba_err_fin");
-    g_permon->addLog("n_candidates");
-    g_permon->addLog("dropout");
-    g_permon->init("trace_frontend", options_.trace_dir);
-  }
+  // if (options_.trace_statistics)
+  // {
+  //   // Initialize Performance Monitor
+  //   g_permon.reset(new vk::PerformanceMonitor());
+  //   g_permon->addTimer("pyramid_creation");
+  //   g_permon->addTimer("sparse_img_align");
+  //   g_permon->addTimer("reproject");
+  //   g_permon->addTimer("reproject_kfs");
+  //   g_permon->addTimer("reproject_candidates");
+  //   g_permon->addTimer("feature_align");
+  //   g_permon->addTimer("pose_optimizer");
+  //   g_permon->addTimer("point_optimizer");
+  //   g_permon->addTimer("local_ba");
+  //   g_permon->addTimer("frontend_time");
+  //   g_permon->addLog("timestamp");
+  //   g_permon->addLog("img_align_n_tracked");
+  //   g_permon->addLog("repr_n_matches_local_map");
+  //   g_permon->addLog("repr_n_trials_local_map");
+  //   g_permon->addLog("repr_n_matches_global_map");
+  //   g_permon->addLog("repr_n_trials_global_map");
+  //   g_permon->addLog("sfba_thresh");
+  //   g_permon->addLog("sfba_error_init");
+  //   g_permon->addLog("sfba_error_final");
+  //   g_permon->addLog("sfba_n_edges_final");
+  //   g_permon->addLog("loba_n_erredges_init");
+  //   g_permon->addLog("loba_n_erredges_fin");
+  //   g_permon->addLog("loba_err_init");
+  //   g_permon->addLog("loba_err_fin");
+  //   g_permon->addLog("n_candidates");
+  //   g_permon->addLog("dropout");
+  //   g_permon->init("trace_frontend", options_.trace_dir);
+  // }
+
   // init modules
   reprojectors_.reserve(cams_->getNumCameras());
   for (size_t camera_idx = 0; camera_idx < cams_->getNumCameras(); ++camera_idx)
@@ -146,12 +147,12 @@ FrameHandlerBase::FrameHandlerBase(const BaseOptions& base_options, const Reproj
   initializer_ = initialization_utils::makeInitializer(init_options, tracker_options, detector_options, cams_);
   overlap_kfs_.resize(cams_->getNumCameras());
 
-  VLOG(1) << "SVO initialized";
+  // VLOG(1) << "SVO initialized";
 }
 
 FrameHandlerBase::~FrameHandlerBase()
 {
-  VLOG(1) << "SVO destructor invoked";
+  // VLOG(1) << "SVO destructor invoked";
 }
 
 //------------------------------------------------------------------------------
@@ -162,7 +163,7 @@ bool FrameHandlerBase::addImageBundle(const std::vector<cv::Mat>& imgs, const ui
     // check if the timestamp is valid
     if (last_frames_->getMinTimestampNanoseconds() >= static_cast<int64_t>(timestamp))
     {
-      VLOG(4) << "Dropping frame: timestamp older than last frame of id " << last_frames_->getBundleId();
+      // VLOG(4) << "Dropping frame: timestamp older than last frame of id " << last_frames_->getBundleId();
       SVO_WARN_STREAM("Dropping frame: timestamp older than last frame.");
       return false;
     }
@@ -170,14 +171,14 @@ bool FrameHandlerBase::addImageBundle(const std::vector<cv::Mat>& imgs, const ui
   else
   {
     // at first iteration initialize tracing if enabled
-    if (options_.trace_statistics && bundle_adjustment_)
-      bundle_adjustment_->setPerformanceMonitor(options_.trace_dir);
+    // if (options_.trace_statistics && bundle_adjustment_)
+    //   bundle_adjustment_->setPerformanceMonitor(options_.trace_dir);
   }
-  if (options_.trace_statistics)
-  {
-    SVO_START_TIMER("pyramid_creation");
-  }
-  CHECK_EQ(imgs.size(), cams_->getNumCameras());
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_START_TIMER("pyramid_creation");
+  // }
+  // CHECK_EQ(imgs.size(), cams_->getNumCameras());
   std::vector<FramePtr> frames;
   for (size_t i = 0; i < imgs.size(); ++i)
   {
@@ -188,10 +189,10 @@ bool FrameHandlerBase::addImageBundle(const std::vector<cv::Mat>& imgs, const ui
     frames.back()->setNFrameIndex(i);
   }
   FrameBundlePtr frame_bundle(new FrameBundle(frames));
-  if (options_.trace_statistics)
-  {
-    SVO_STOP_TIMER("pyramid_creation");
-  }
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_STOP_TIMER("pyramid_creation");
+  // }
   // Process frame bundle.
   return addFrameBundle(frame_bundle);
 }
@@ -199,8 +200,8 @@ bool FrameHandlerBase::addImageBundle(const std::vector<cv::Mat>& imgs, const ui
 //------------------------------------------------------------------------------
 bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
 {
-  VLOG(40) << "New Frame Bundle received: " << frame_bundle->getBundleId();  
-  CHECK_EQ(frame_bundle->size(), cams_->numCameras());
+  // VLOG(40) << "New Frame Bundle received: " << frame_bundle->getBundleId();  
+  // CHECK_EQ(frame_bundle->size(), cams_->numCameras());
 
   // ---------------------------------------------------------------------------
   // Prepare processing.
@@ -222,15 +223,15 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
     return false;
   }
 
-  if (options_.trace_statistics)
-  {
-    SVO_LOG("timestamp", frame_bundle->at(0)->getTimestampNSec());
-    SVO_START_TIMER("frontend_time");
-    if (bundle_adjustment_)
-    {
-      bundle_adjustment_->startTimer(frame_bundle->getBundleId());
-    }
-  }
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_LOG("timestamp", frame_bundle->at(0)->getTimestampNSec());
+  //   SVO_START_TIMER("frontend_time");
+  //   if (bundle_adjustment_)
+  //   {
+  //     bundle_adjustment_->startTimer(frame_bundle->getBundleId());
+  //   }
+  // }
   timer_.start();
 
   // ---------------------------------------------------------------------------
@@ -270,7 +271,7 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
 
     //--- Actual Update
     // if we are reinitializing, restore the previous states
-    VLOG(40) << "Load map and motion prior from backend.";
+    // VLOG(40) << "Load map and motion prior from backend.";
     if (backend_reinit_)
     {
       bundle_adjustment_->setReinitStartValues(speed_bias_backend_latest_,
@@ -327,7 +328,7 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
       if (backend_scale_stable)
       {
         backend_scale_initialized_ = true;
-        VLOG(2) << "backend scale initialized";
+        // VLOG(2) << "backend scale initialized";
       }
       else if (stage_ != Stage::kInitializing)
       {
@@ -337,7 +338,7 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
             depth_median_, depth_min_, depth_max_);
         depth_filter_->updateSeeds(overlap_kfs_.at(0),
                                    last_frames_->frames_[0]);
-        VLOG(2) << "Adjusting SVO scale to backend";
+        // VLOG(2) << "Adjusting SVO scale to backend";
       }
     }
   }
@@ -347,7 +348,7 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
     // TODO(cfo): remove same from processFrame in mono.
     if (last_frames_)
     {
-      VLOG(40) << "Predict pose of new image using motion prior.";
+      // VLOG(40) << "Predict pose of new image using motion prior.";
       getMotionPrior(false);
 
       // set initial pose estimate
@@ -379,7 +380,7 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
       }
     }
 #endif
-    VLOG(40) << "Call bundle adjustment.";
+    // VLOG(40) << "Call bundle adjustment.";
     bundle_adjustment_->bundleAdjustment(new_frames_);
   }
 
@@ -471,8 +472,8 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
   {
     if (isInRecovery())
     {
-      CHECK_GT(new_frames_->getMinTimestampSeconds(),
-               last_good_tracking_time_sec_);
+      // CHECK_GT(new_frames_->getMinTimestampSeconds(),
+              //  last_good_tracking_time_sec_);
       if ((new_frames_->getMinTimestampSeconds() - last_good_tracking_time_sec_)
           < options_.global_map_lc_timeout_sec_)
       {
@@ -490,12 +491,12 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
   // Try relocalizing if tracking failed.
   if(update_res_ == UpdateResult::kFailure)
   {
-    VLOG(2) << "Tracking failed: RELOCALIZE.";
-    CHECK(stage_ == Stage::kTracking || stage_ == Stage::kInitializing || stage_ == Stage::kRelocalization);
+    // VLOG(2) << "Tracking failed: RELOCALIZE.";
+    // CHECK(stage_ == Stage::kTracking || stage_ == Stage::kInitializing || stage_ == Stage::kRelocalization);
 
     // Let's try to relocalize with respect to the last keyframe:
     reloc_keyframe_ = map_->getLastKeyframe();
-    CHECK_NOTNULL(reloc_keyframe_.get());
+    // CHECK_NOTNULL(reloc_keyframe_.get());
 
     // Reset pose to previous frame to avoid crazy jumps.
     if (stage_ == Stage::kTracking && last_frames_)
@@ -508,8 +509,8 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
     if (stage_ == Stage::kRelocalization &&
         relocalization_n_trials_ >= options_.relocalization_max_trials)
     {
-      VLOG(2) << "Relocalization failed "
-              << options_.relocalization_max_trials << " times: RESET.";
+      // VLOG(2) << "Relocalization failed "
+              // << options_.relocalization_max_trials << " times: RESET.";
       set_reset_ = true;
       backend_reinit_ = true;
 
@@ -540,29 +541,29 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
   T_newimu_lastimu_prior_.setIdentity();
 
   // tracing
-  if (options_.trace_statistics)
-  {
-    SVO_LOG("dropout", static_cast<int>(update_res_));
-    SVO_STOP_TIMER("frontend_time");
-    g_permon->writeToFile();
-  }
+  // if (options_.trace_statistics)
+  // {
+    // SVO_LOG("dropout", static_cast<int>(update_res_));
+    // SVO_STOP_TIMER("frontend_time");
+    // g_permon->writeToFile();
+  // }
   // Call callbacks.
-  VLOG(40) << "Triggering addFrameBundle() callbacks...";
-  triggerCallbacks(last_frames_);
+  // // VLOG(40) << "Triggering addFrameBundle() callbacks...";
+  // triggerCallbacks(last_frames_);
   return true;
 }
 
 //------------------------------------------------------------------------------
 void FrameHandlerBase::setRotationPrior(const Quaternion& R_imu_world)
 {
-  VLOG(40) << "Set rotation prior.";
+  // VLOG(40) << "Set rotation prior.";
   R_imu_world_ = R_imu_world;
   have_rotation_prior_ = true;
 }
 
 void FrameHandlerBase::setRotationIncrementPrior(const Quaternion& R_lastimu_newimu)
 {
-  VLOG(40) << "Set rotation increment prior.";
+  // VLOG(40) << "Set rotation increment prior.";
   R_imu_world_ = R_lastimu_newimu.inverse() * R_imulast_world_;
   have_rotation_prior_ = true;
 }
@@ -572,7 +573,7 @@ void FrameHandlerBase::setInitialPose(const FrameBundlePtr& frame_bundle) const
 {
   if (have_rotation_prior_)
   {
-    VLOG(40) << "Set initial pose: With rotation prior";
+    // VLOG(40) << "Set initial pose: With rotation prior";
     for (size_t i = 0; i < frame_bundle->size(); ++i)
     {
       frame_bundle->at(i)->T_f_w_ = cams_->get_T_C_B(i) * Transformation(R_imu_world_, Vector3d::Zero());
@@ -580,7 +581,7 @@ void FrameHandlerBase::setInitialPose(const FrameBundlePtr& frame_bundle) const
   }
   else if (frame_bundle->imu_measurements_.cols() > 0)
   {
-    VLOG(40) << "Set initial pose: Use inertial measurements in frame to get gravity.";
+    // VLOG(40) << "Set initial pose: Use inertial measurements in frame to get gravity.";
     const Vector3d g = frame_bundle->imu_measurements_.topRows<3>().rowwise().sum();
     const Vector3d z = g.normalized(); // imu measures positive-z when static
     // TODO: make sure z != -1,0,0
@@ -597,11 +598,11 @@ void FrameHandlerBase::setInitialPose(const FrameBundlePtr& frame_bundle) const
     C_imu_world.col(2) = z;
     Transformation T_imu_world(Quaternion(C_imu_world), Eigen::Vector3d::Zero());
     frame_bundle->set_T_W_B(T_imu_world.inverse());
-    VLOG(3) << "Initial Rotation = " << std::endl << C_imu_world.transpose() << std::endl;
+    // VLOG(3) << "Initial Rotation = " << std::endl << C_imu_world.transpose() << std::endl;
   }
   else
   {
-    VLOG(40) << "Set initial pose: set such that T_imu_world is identity.";
+    // VLOG(40) << "Set initial pose: set such that T_imu_world is identity.";
     for (size_t i = 0; i < frame_bundle->size(); ++i)
     {
       frame_bundle->at(i)->T_f_w_ = cams_->get_T_C_B(i) * T_world_imuinit.inverse();
@@ -616,11 +617,11 @@ size_t FrameHandlerBase::sparseImageAlignment()
   // this will improve the relative transformation between the previous and the new frame
   // the result is the number of feature points which could be tracked
   // this is a hierarchical KLT solver
-  VLOG(40) << "Sparse image alignment.";
-  if (options_.trace_statistics)
-  {
-    SVO_START_TIMER("sparse_img_align");
-  }
+  // // VLOG(40) << "Sparse image alignment.";
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_START_TIMER("sparse_img_align");
+  // }
   sparse_img_align_->reset();
   if (have_motion_prior_)
   {
@@ -636,23 +637,23 @@ size_t FrameHandlerBase::sparseImageAlignment()
   sparse_img_align_->setMaxNumFeaturesToAlign(options_.img_align_max_num_features);
   size_t img_align_n_tracked = sparse_img_align_->run(last_frames_, new_frames_);
 
-  if (options_.trace_statistics)
-  {
-    SVO_STOP_TIMER("sparse_img_align");
-    SVO_LOG("img_align_n_tracked", img_align_n_tracked);
-  }
-  VLOG(40) << "Sparse image alignment tracked " << img_align_n_tracked << " features.";
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_STOP_TIMER("sparse_img_align");
+  //   SVO_LOG("img_align_n_tracked", img_align_n_tracked);
+  // }
+  // // VLOG(40) << "Sparse image alignment tracked " << img_align_n_tracked << " features.";
   return img_align_n_tracked;
 }
 
 //------------------------------------------------------------------------------
 size_t FrameHandlerBase::projectMapInFrame()
 {
-  VLOG(40) << "Project map in frame.";
-  if (options_.trace_statistics)
-  {
-    SVO_START_TIMER("reproject");
-  }
+  // // VLOG(40) << "Project map in frame.";
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_START_TIMER("reproject");
+  // }
   // compute overlap keyframes
   for (size_t camera_idx = 0; camera_idx < cams_->numCameras(); ++camera_idx)
   {
@@ -722,16 +723,16 @@ size_t FrameHandlerBase::projectMapInFrame()
     cumul_stats_global_map.n_trials += reprojector->fixed_lm_stats_.n_trials;
   }
 
-  if (options_.trace_statistics)
-  {
-    SVO_STOP_TIMER("reproject");
-    SVO_LOG("repr_n_matches_local_map", cumul_stats_.n_matches);
-    SVO_LOG("repr_n_trials_local_map", cumul_stats_.n_trials);
-    SVO_LOG("repr_n_matches_global_map", cumul_stats_global_map.n_matches);
-    SVO_LOG("repr_n_trials_global_map", cumul_stats_global_map.n_trials);
-  }
-  VLOG(40) << "Reprojection:" << "\t nPoints = " << cumul_stats_.n_trials << "\t\t nMatches = "
-      << cumul_stats_.n_matches;
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_STOP_TIMER("reproject");
+  //   SVO_LOG("repr_n_matches_local_map", cumul_stats_.n_matches);
+  //   SVO_LOG("repr_n_trials_local_map", cumul_stats_.n_trials);
+  //   SVO_LOG("repr_n_matches_global_map", cumul_stats_global_map.n_matches);
+  //   SVO_LOG("repr_n_trials_global_map", cumul_stats_global_map.n_trials);
+  // }
+  // // VLOG(40) << "Reprojection:" << "\t nPoints = " << cumul_stats_.n_trials << "\t\t nMatches = "
+  //     << cumul_stats_.n_matches;
 
   size_t n_total_ftrs = cumul_stats_.n_matches +
       (cumul_stats_global_map.n_matches <= 10? 0 : cumul_stats_global_map.n_matches);
@@ -752,27 +753,27 @@ size_t FrameHandlerBase::optimizePose()
   // optimize the pose of the frame in such a way, that the projection of all feature world coordinates
   // is not far off the position of the feature points within the frame. The optimization is done for all points
   // in the same time, hence optimizing frame pose.
-  if (options_.trace_statistics)
-  {
-    SVO_START_TIMER("pose_optimizer");
-  }
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_START_TIMER("pose_optimizer");
+  // }
 
   pose_optimizer_->reset();
   if (have_motion_prior_)
   {
-    VLOG(40) << "Apply prior to pose optimization";
+    // VLOG(40) << "Apply prior to pose optimization";
     pose_optimizer_->setRotationPrior(new_frames_->get_T_W_B().getRotation().inverse(),
                                       options_.poseoptim_prior_lambda);
   }
   size_t sfba_n_edges_final = pose_optimizer_->run(new_frames_, options_.poseoptim_thresh);
 
-  if (options_.trace_statistics)
-  {
-    SVO_LOG("sfba_error_init", pose_optimizer_->stats_.reproj_error_before);
-    SVO_LOG("sfba_error_final", pose_optimizer_->stats_.reproj_error_after);
-    SVO_LOG("sfba_n_edges_final", sfba_n_edges_final);
-    SVO_STOP_TIMER("pose_optimizer");
-  }
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_LOG("sfba_error_init", pose_optimizer_->stats_.reproj_error_before);
+  //   SVO_LOG("sfba_error_final", pose_optimizer_->stats_.reproj_error_after);
+  //   SVO_LOG("sfba_n_edges_final", sfba_n_edges_final);
+  //   SVO_STOP_TIMER("pose_optimizer");
+  // }
   SVO_DEBUG_STREAM(
       "PoseOptimizer:" << "\t ErrInit = " << pose_optimizer_->stats_.reproj_error_before << "\t ErrFin = " << pose_optimizer_->stats_.reproj_error_after << "\t nObs = " << sfba_n_edges_final);
   return sfba_n_edges_final;
@@ -781,17 +782,17 @@ size_t FrameHandlerBase::optimizePose()
 //------------------------------------------------------------------------------
 void FrameHandlerBase::optimizeStructure(const FrameBundle::Ptr& frames, int max_n_pts, int max_iter)
 {
-  VLOG(40) << "Optimize structure.";
+  // VLOG(40) << "Optimize structure.";
   // some feature points will be optimized w.r.t keyframes they were observed
   // in the way that their projection error into all other keyframes is minimzed
 
   if (max_n_pts == 0)
     return; // don't return if max_n_pts == -1, this means we optimize ALL points
 
-  if (options_.trace_statistics)
-  {
-    SVO_START_TIMER("point_optimizer");
-  }
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_START_TIMER("point_optimizer");
+  // }
   for (const FramePtr& frame : frames->frames_)
   {
     bool optimize_on_sphere = false;
@@ -821,16 +822,16 @@ void FrameHandlerBase::optimizeStructure(const FrameBundle::Ptr& frames, int max
       point->last_structure_optim_ = frame->id_;
     }
   }
-  if (options_.trace_statistics)
-  {
-    SVO_STOP_TIMER("point_optimizer");
-  }
+  // if (options_.trace_statistics)
+  // {
+  //   SVO_STOP_TIMER("point_optimizer");
+  // }
 }
 
 //------------------------------------------------------------------------------
 void FrameHandlerBase::upgradeSeedsToFeatures(const FramePtr& frame)
 {
-  VLOG(40) << "Upgrade seeds to features";
+  // VLOG(40) << "Upgrade seeds to features";
   size_t update_count = 0;
   size_t unconverged_cnt = 0;
   for (size_t i = 0; i < frame->num_features_; ++i)
@@ -845,7 +846,7 @@ void FrameHandlerBase::upgradeSeedsToFeatures(const FramePtr& frame)
       }
       else
       {
-        CHECK(isFixedLandmark(type));
+        // CHECK(isFixedLandmark(type));
         frame->landmark_vec_[i]->addObservation(frame, i);
       }
     }
@@ -901,7 +902,7 @@ void FrameHandlerBase::upgradeSeedsToFeatures(const FramePtr& frame)
       }
       else
       {
-        CHECK(false) << "Seed-Type not known";
+        // CHECK(false) << "Seed-Type not known";
       }
       ++update_count;
     }
@@ -910,9 +911,9 @@ void FrameHandlerBase::upgradeSeedsToFeatures(const FramePtr& frame)
     frame->seed_ref_vec_[i].keyframe.reset();
     frame->seed_ref_vec_[i].seed_id = -1;
   }
-  VLOG(5) << "NEW KEYFRAME: Updated "
-          << update_count << " seeds to features in reference frame, "
-          << "including " << unconverged_cnt << " unconverged points.\n";
+  // VLOG(5) << "NEW KEYFRAME: Updated "
+          // << update_count << " seeds to features in reference frame, "
+          // << "including " << unconverged_cnt << " unconverged points.\n";
   const double ratio = (1.0 * unconverged_cnt) / update_count;
   if (ratio > 0.2)
   {
@@ -947,7 +948,7 @@ void FrameHandlerBase::resetVisionFrontendCommon()
   depth_filter_->reset();
   initializer_->reset();
 
-  VLOG(1) << "SVO RESET ALL";
+  // VLOG(1) << "SVO RESET ALL";
 }
 
 void FrameHandlerBase::resetBackend()
@@ -1026,7 +1027,7 @@ bool FrameHandlerBase::needNewKf(const Transformation&)
           && fabs(relpos.z()) / depth_median_ < options_.kfselect_min_dist * 1.3)
         return false;
     }
-    VLOG(40) << "KF Select: NEW KEYFRAME";
+    // VLOG(40) << "KF Select: NEW KEYFRAME";
     return true;
   }
 
@@ -1044,7 +1045,7 @@ bool FrameHandlerBase::needNewKf(const Transformation&)
 
   if (n_tracked_fts > options_.kfselect_numkfs_upper_thresh)
   {
-    VLOG(40) << "KF Select: NO NEW KEYFRAME Above upper bound";
+    // VLOG(40) << "KF Select: NO NEW KEYFRAME Above upper bound";
     return false;
   }
 
@@ -1052,13 +1053,13 @@ bool FrameHandlerBase::needNewKf(const Transformation&)
   if (last_frames_->at(0)->id() - map_->last_added_kf_id_ <
       options_.kfselect_min_num_frames_between_kfs)
   {
-    VLOG(40) << "KF Select: NO NEW KEYFRAME We just had a KF";
+    // VLOG(40) << "KF Select: NO NEW KEYFRAME We just had a KF";
     return false;
   }
 
   if (n_tracked_fts < options_.kfselect_numkfs_lower_thresh)
   {
-    VLOG(40) << "KF Select: NEW KEYFRAME Below lower bound";
+    // VLOG(40) << "KF Select: NEW KEYFRAME Below lower bound";
     return true;
   }
 
@@ -1095,10 +1096,10 @@ bool FrameHandlerBase::needNewKf(const Transformation&)
     if (!disparities.empty())
     {
       double disparity = vk::getMedian(disparities);
-      VLOG(40) << "KF Select: disparity = " << disparity;
+      // VLOG(40) << "KF Select: disparity = " << disparity;
       if (disparity < options_.kfselect_min_disparity)
       {
-        VLOG(40) << "KF Select: NO NEW KEYFRAME disparity not large enough";
+        // VLOG(40) << "KF Select: NO NEW KEYFRAME disparity not large enough";
         return false;
       }
     }
@@ -1115,12 +1116,12 @@ bool FrameHandlerBase::needNewKf(const Transformation&)
     if (a < options_.kfselect_min_angle
         && d < options_.kfselect_min_dist_metric)
     {
-      VLOG(40) << "KF Select: NO NEW KEYFRAME Min angle = " << a
-               << ", min dist = " << d;
+      // VLOG(40) << "KF Select: NO NEW KEYFRAME Min angle = " << a
+              //  << ", min dist = " << d;
       return false;
     }
   }
-  VLOG(40) << "KF Select: NEW KEYFRAME";
+  // VLOG(40) << "KF Select: NEW KEYFRAME";
   return true;
 }
 
@@ -1128,13 +1129,13 @@ void FrameHandlerBase::getMotionPrior(const bool /*use_velocity_in_frame*/)
 {
   if (have_rotation_prior_)
   {
-    VLOG(40) << "Get motion prior from provided rotation prior.";
+    // VLOG(40) << "Get motion prior from provided rotation prior.";
     T_newimu_lastimu_prior_ = Transformation(R_imulast_world_ * R_imu_world_.inverse(), t_lastimu_newimu_).inverse();
     have_motion_prior_ = true;
   }
   else if (new_frames_->imu_timestamps_ns_.cols() > 0)
   {
-    VLOG(40) << "Get motion prior from integrated IMU measurements.";
+    // VLOG(40) << "Get motion prior from integrated IMU measurements.";
     const Eigen::Matrix<int64_t, 1, Eigen::Dynamic>& imu_timestamps_ns =
         new_frames_->imu_timestamps_ns_;
     const Eigen::Matrix<double, 6, Eigen::Dynamic>& imu_measurements =
@@ -1147,8 +1148,8 @@ void FrameHandlerBase::getMotionPrior(const bool /*use_velocity_in_frame*/)
       const double delta_t_seconds =
           (imu_timestamps_ns(m_idx + 1) - imu_timestamps_ns(m_idx))
           * common::conversions::kNanoSecondsToSeconds;
-      CHECK_LE(delta_t_seconds, 1e-12)<<
-      "IMU timestamps need to be strictly increasing.";
+      // CHECK_LE(delta_t_seconds, 1e-12)<<
+      // "IMU timestamps need to be strictly increasing.";
 
       const Eigen::Vector3d w = imu_measurements.col(m_idx).tail<3>() - gyro_bias;
       const Quaternion R_incr = Quaternion::exp(w * delta_t_seconds);
@@ -1191,7 +1192,7 @@ void FrameHandlerBase::getMotionPrior(const bool /*use_velocity_in_frame*/)
            || options_.img_align_prior_lambda_rot > 0
            || options_.img_align_prior_lambda_trans > 0)
   {
-    VLOG(40) << "Get motion prior by assuming constant velocity.";
+    // VLOG(40) << "Get motion prior by assuming constant velocity.";
     T_newimu_lastimu_prior_ = Transformation(Quaternion(), t_lastimu_newimu_).inverse();
     have_motion_prior_ = true;
   }
@@ -1203,7 +1204,7 @@ void FrameHandlerBase::setDetectorOccupiedCells(
     const size_t reprojector_grid_idx, const DetectorPtr& feature_detector)
 {
   const Reprojector& rep = *reprojectors_.at(reprojector_grid_idx);
-  CHECK_EQ(feature_detector->grid_.size(), rep.grid_->size());
+  // CHECK_EQ(feature_detector->grid_.size(), rep.grid_->size());
   feature_detector->grid_.occupancy_ = rep.grid_->occupancy_;
   if (rep.fixed_landmark_grid_)
   {

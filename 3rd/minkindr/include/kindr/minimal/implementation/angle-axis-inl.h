@@ -39,16 +39,16 @@ AngleAxisTemplate<Scalar>::AngleAxisTemplate() :
 template<typename Scalar>
 AngleAxisTemplate<Scalar>::AngleAxisTemplate(
     Scalar w, Scalar x, Scalar y, Scalar z) : C_A_B_(w, Vector3(x,y,z)) {
-  CHECK_NEAR(Vector3(x,y,z).squaredNorm(), static_cast<Scalar>(1.0),
-             static_cast<Scalar>(1e-4));
+  // CHECK_NEAR(Vector3(x,y,z).squaredNorm(), static_cast<Scalar>(1.0),
+            //  static_cast<Scalar>(1e-4));
 }
  
 template<typename Scalar>
 AngleAxisTemplate<Scalar>::AngleAxisTemplate(
     Scalar angle, const typename AngleAxisTemplate<Scalar>::Vector3& axis) :
     C_A_B_(angle, axis){
-    CHECK_NEAR(axis.squaredNorm(), static_cast<Scalar>(1.0),
-               static_cast<Scalar>(1e-4));
+    // CHECK_NEAR(axis.squaredNorm(), static_cast<Scalar>(1.0),
+              //  static_cast<Scalar>(1e-4));
 }
 
 template<typename Scalar>
@@ -111,16 +111,16 @@ AngleAxisTemplate<Scalar>::axis() const{
 
 template<typename Scalar>
 void AngleAxisTemplate<Scalar>::setAxis(const Vector3& axis){
-  CHECK_NEAR(axis.squaredNorm(), static_cast<Scalar>(1.0),
-             static_cast<Scalar>(1e-4));
+  // CHECK_NEAR(axis.squaredNorm(), static_cast<Scalar>(1.0),
+            //  static_cast<Scalar>(1e-4));
   C_A_B_.axis() = axis;
 }
 
 template<typename Scalar>
 void AngleAxisTemplate<Scalar>::setAxis(Scalar v1, Scalar v2, Scalar v3){
   C_A_B_.axis() = Vector3(v1,v2,v3);
-  CHECK_NEAR(C_A_B_.axis().squaredNorm(), static_cast<Scalar>(1.0),
-             static_cast<Scalar>(1e-4));
+  // CHECK_NEAR(C_A_B_.axis().squaredNorm(), static_cast<Scalar>(1.0),
+            //  static_cast<Scalar>(1e-4));
 }
 
 template<typename Scalar>

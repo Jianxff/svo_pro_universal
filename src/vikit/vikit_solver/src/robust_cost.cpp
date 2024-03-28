@@ -3,7 +3,7 @@
 #include <cmath>
 #include <numeric>
 #include <algorithm>
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace vk {
 namespace solver {
@@ -18,7 +18,7 @@ float UnitScaleEstimator::compute(std::vector<float>& /*errors*/) const
 
 float MADScaleEstimator::compute(std::vector<float>& errors) const
 {
-  CHECK(!errors.empty()) << "Error vector is empty.";
+  // CHECK(!errors.empty()) << "Error vector is empty.";
   auto it = errors.begin()+std::floor(errors.size()/2);
   std::nth_element(errors.begin(), it, errors.end()); // compute median
   return 1.48f * (*it); // 1.48f / 0.6745

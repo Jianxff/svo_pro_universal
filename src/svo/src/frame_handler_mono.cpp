@@ -69,7 +69,7 @@ UpdateResult FrameHandlerMono::processFirstFrame()
   }
   if(have_rotation_prior_)
   {
-    VLOG(2) << "Setting absolute orientation prior";
+    // VLOG(2) << "Setting absolute orientation prior";
     initializer_->setAbsoluteOrientationPrior(
           newFrame()->T_cam_imu().getRotation() * R_imu_world_);
   }
@@ -88,8 +88,8 @@ UpdateResult FrameHandlerMono::processFirstFrame()
   }
   else if(bundle_adjustment_type_==BundleAdjustmentType::kGtsam)
   {
-    CHECK(bundle_adjustment_)
-        << "bundle_adjustment_type_ is kGtsam but bundle_adjustment_ is NULL";
+    // CHECK(bundle_adjustment_)
+        // << "bundle_adjustment_type_ is kGtsam but bundle_adjustment_ is NULL";
     bundle_adjustment_->bundleAdjustment(initializer_->frames_ref_);
   }
   else
@@ -99,11 +99,11 @@ UpdateResult FrameHandlerMono::processFirstFrame()
   // make new frame keyframe
   newFrame()->setKeyframe();
   frame_utils::getSceneDepth(newFrame(), depth_median_, depth_min_, depth_max_);
-  VLOG(40) << "Current Frame Depth: " << "min: " << depth_min_
-          << ", max: " << depth_max_ << ", median: " << depth_median_;
+  // VLOG(40) << "Current Frame Depth: " << "min: " << depth_min_
+          // << ", max: " << depth_max_ << ", median: " << depth_median_;
   depth_filter_->addKeyframe(
               newFrame(), depth_median_, 0.5*depth_min_, depth_median_*1.5);
-  VLOG(40) << "Updating seeds in second frame using last frame...";
+  // VLOG(40) << "Updating seeds in second frame using last frame...";
   depth_filter_->updateSeeds({ newFrame() }, lastFrameUnsafe());
 
   // add frame to map
@@ -113,13 +113,13 @@ UpdateResult FrameHandlerMono::processFirstFrame()
   stage_ = Stage::kTracking;
   tracking_quality_ = TrackingQuality::kGood;
   initializer_->reset();
-  VLOG(1) << "Init: Selected second frame, triangulated initial map.";
+  // VLOG(1) << "Init: Selected second frame, triangulated initial map.";
   return UpdateResult::kKeyframe;
 }
 
 UpdateResult FrameHandlerMono::processFrame()
 {
-  VLOG(40) << "Updating seeds in overlapping keyframes...";
+  // VLOG(40) << "Updating seeds in overlapping keyframes...";
   // this is useful when the pipeline is with the backend,
   // where we should have more accurate pose at this moment
   depth_filter_->updateSeeds(overlap_kfs_.at(0), lastFrame());
@@ -128,12 +128,12 @@ UpdateResult FrameHandlerMono::processFrame()
   // tracking
 
   // STEP 1: Sparse Image Align
-  VLOG(40) << "===== Sparse Image Alignment =====";
+  // VLOG(40) << "===== Sparse Image Alignment =====";
   size_t n_total_observations = 0;
   sparseImageAlignment();
 
   // STEP 2: Map Reprojection & Feature Align
-  VLOG(40) << "===== Project Map to Current Frame =====";
+  // VLOG(40) << "===== Project Map to Current Frame =====";
   n_total_observations = projectMapInFrame();
   if(n_total_observations < options_.quality_min_fts)
   {
@@ -146,7 +146,7 @@ UpdateResult FrameHandlerMono::processFrame()
   // redundant when using ceres backend
   if(bundle_adjustment_type_!=BundleAdjustmentType::kCeres)
   {
-    VLOG(40) << "===== Pose Optimization =====";
+    // VLOG(40) << "===== Pose Optimization =====";
     n_total_observations = optimizePose();
     if(n_total_observations < options_.quality_min_fts)
     {
@@ -164,10 +164,10 @@ UpdateResult FrameHandlerMono::processFrame()
 
   // ---------------------------------------------------------------------------
   // select keyframe
-  VLOG(40) << "===== Keyframe Selection =====";
+  // VLOG(40) << "===== Keyframe Selection =====";
   frame_utils::getSceneDepth(newFrame(), depth_median_, depth_min_, depth_max_);
-  VLOG(40) << "Current Frame Depth: " << "min: " << depth_min_
-           << ", max: " << depth_max_ << ", median: " << depth_median_;
+  // VLOG(40) << "Current Frame Depth: " << "min: " << depth_min_
+          //  << ", max: " << depth_max_ << ", median: " << depth_median_;
   initializer_->setDepthPrior(depth_median_);
   initializer_->have_depth_prior_ = true;
   if(!need_new_kf_(newFrame()->T_f_w_)
@@ -176,15 +176,15 @@ UpdateResult FrameHandlerMono::processFrame()
   {
     if(tracking_quality_ == TrackingQuality::kGood)
     {
-      VLOG(40) << "Updating seeds in overlapping keyframes...";
-      CHECK(!overlap_kfs_.empty());
+      // VLOG(40) << "Updating seeds in overlapping keyframes...";
+      // CHECK(!overlap_kfs_.empty());
       // now the seed is updated at the beginning of next frame
 //      depth_filter_->updateSeeds(overlap_kfs_.at(0), newFrame());
     }
     return UpdateResult::kDefault;
   }
   newFrame()->setKeyframe();
-  VLOG(40) << "New keyframe selected.";
+  // VLOG(40) << "New keyframe selected.";
 
   // ---------------------------------------------------------------------------
   // new keyframe selected
@@ -217,14 +217,14 @@ UpdateResult FrameHandlerMono::processFrame()
 
   if(options_.update_seeds_with_old_keyframes)
   {
-    VLOG(40) << "Updating seeds in current frame using last frame...";
+    // VLOG(40) << "Updating seeds in current frame using last frame...";
     depth_filter_->updateSeeds({ newFrame() }, lastFrameUnsafe());
-    VLOG(40) << "Updating seeds in current frame using overlapping keyframes...";
+    // VLOG(40) << "Updating seeds in current frame using overlapping keyframes...";
     for(const FramePtr& old_keyframe : overlap_kfs_.at(0))
       depth_filter_->updateSeeds({ newFrame() }, old_keyframe);
   }
 
-  VLOG(40) << "Updating seeds in overlapping keyframes...";
+  // VLOG(40) << "Updating seeds in overlapping keyframes...";
 //  depth_filter_->updateSeeds(overlap_kfs_.at(0), newFrame());
 
   // add keyframe to map
@@ -259,7 +259,7 @@ UpdateResult FrameHandlerMono::relocalizeFrame(
   if(ref_keyframe == nullptr)
     return UpdateResult::kFailure;
 
-  VLOG_EVERY_N(1, 20) << "Relocalizing frame";
+  // VLOG_EVERY_N(1, 20) << "Relocalizing frame";
   FrameBundle::Ptr ref_frame(new FrameBundle({ref_keyframe}, ref_keyframe->bundleId()));
   last_frames_ = ref_frame;
   UpdateResult res = processFrame();
@@ -268,7 +268,7 @@ UpdateResult FrameHandlerMono::relocalizeFrame(
     // Reset to default mode.
     stage_ = Stage::kTracking;
     relocalization_n_trials_ = 0;
-    VLOG(1) << "Relocalization successful.";
+    // VLOG(1) << "Relocalization successful.";
   }
   else
   {

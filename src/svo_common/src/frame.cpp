@@ -54,13 +54,13 @@ Frame::~Frame()
 
 void Frame::initFrame(const cv::Mat& img, size_t n_pyr_levels)
 {
-  CHECK_EQ(key_pts_[0].first, -1);
-  CHECK_EQ(key_pts_[4].first, -1);
+  // CHECK_EQ(key_pts_[0].first, -1);
+  // CHECK_EQ(key_pts_[4].first, -1);
 
   // check image
-  CHECK(!img.empty());
-  CHECK_EQ(img.cols, static_cast<int>(cam_->imageWidth()));
-  CHECK_EQ(img.rows, static_cast<int>(cam_->imageHeight()));
+  // CHECK(!img.empty());
+  // CHECK_EQ(img.cols, static_cast<int>(cam_->imageWidth()));
+  // CHECK_EQ(img.rows, static_cast<int>(cam_->imageHeight()));
 
   if (img.type() == CV_8UC1)
   {
@@ -156,7 +156,7 @@ void Frame::copyFeaturesFrom(const Frame& other)
 
 FeatureWrapper Frame::getFeatureWrapper(size_t index)
 {
-  CHECK_LT(index, static_cast<size_t>(px_vec_.cols()));
+  // CHECK_LT(index, static_cast<size_t>(px_vec_.cols()));
   return FeatureWrapper(
         type_vec_[index], px_vec_.col(index), f_vec_.col(index),
         grad_vec_.col(index), score_vec_(index), level_vec_(index), landmark_vec_[index],
@@ -371,10 +371,10 @@ namespace frame_utils {
 
 void createImgPyramid(const cv::Mat& img_level_0, int n_levels, ImgPyr& pyr)
 {
-  CHECK_EQ(img_level_0.type(), CV_8U);
-  CHECK_GT(img_level_0.rows, 0);
-  CHECK_GT(img_level_0.cols, 0);
-  CHECK_GT(n_levels, 0);
+  // CHECK_EQ(img_level_0.type(), CV_8U);
+  // CHECK_GT(img_level_0.rows, 0);
+  // CHECK_GT(img_level_0.cols, 0);
+  // CHECK_GT(n_levels, 0);
 
   pyr.resize(n_levels);
   pyr[0] = img_level_0;
@@ -429,11 +429,11 @@ void computeNormalizedBearingVectors(
     const Camera& cam,
     Bearings* f_vec)
 {
-  CHECK_NOTNULL(f_vec);
+  // CHECK_NOTNULL(f_vec);
   std::vector<bool> success;
   cam.backProject3(px_vec, f_vec, &success);
   for (const bool s : success) {
-    CHECK(s);
+    // CHECK(s);
   }
   *f_vec = f_vec->array().rowwise() / f_vec->colwise().norm().array();
 }

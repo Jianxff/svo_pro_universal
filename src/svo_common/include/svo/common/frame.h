@@ -241,7 +241,7 @@ public:
 
   /// Get storage index of frame in parent NFrame.
   inline int getNFrameIndex() const {
-    CHECK_GE(nframe_index_, 0) << "NFrame Index not set in frame.";
+    // CHECK_GE(nframe_index_, 0) << "NFrame Index not set in frame.";
     return nframe_index_;
   }
 
@@ -456,7 +456,7 @@ public:
 
   /// Get timestamp of camera rig.
   inline int64_t getMinTimestampNanoseconds() const {
-    CHECK(!frames_.empty());
+    // CHECK(!frames_.empty());
     return frames_[0]->getTimestampNSec();
   }
 
@@ -470,7 +470,7 @@ public:
 
   /// Get pose of camera rig.
   Transformation get_T_W_B() const {
-    CHECK(!frames_.empty());
+    // CHECK(!frames_.empty());
     return frames_[0]->T_world_imu();
   }
 

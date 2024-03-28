@@ -42,8 +42,8 @@ size_t SparseImgAlignGpu::run(
     const FrameBundle::Ptr& ref_frames,
     const FrameBundle::Ptr& cur_frames)
 {
-  CHECK(!ref_frames->empty());
-  CHECK_EQ(ref_frames->size(),cur_frames->size());
+  // CHECK(!ref_frames->empty());
+  // CHECK_EQ(ref_frames->size(),cur_frames->size());
 
   // Set member variables
   ref_frames_ = ref_frames;

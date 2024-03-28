@@ -1,4 +1,4 @@
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace vk {
 namespace cameras {
@@ -20,8 +20,8 @@ bool CameraGeometryBase::isKeypointVisibleWithMargin(
     typename DerivedKeyPoint::Scalar margin) const {
   typedef typename DerivedKeyPoint::Scalar Scalar;
   EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(DerivedKeyPoint, 2, 1);
-  CHECK_LT(2 * margin, static_cast<Scalar>(imageWidth()));
-  CHECK_LT(2 * margin, static_cast<Scalar>(imageHeight()));
+  // CHECK_LT(2 * margin, static_cast<Scalar>(imageWidth()));
+  // CHECK_LT(2 * margin, static_cast<Scalar>(imageHeight()));
   return keypoint[0] >= margin
       && keypoint[1] >= margin
       && keypoint[0] < (static_cast<Scalar>(imageWidth()) - margin)

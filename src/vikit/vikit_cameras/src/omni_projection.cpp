@@ -1,6 +1,6 @@
 #include "vikit/cameras/omni_projection.h"
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace vk {
 namespace cameras {
@@ -30,7 +30,7 @@ bool OmniProjection::backProject3(
     const Eigen::Ref<const Eigen::Vector2d>& keypoint,
     Eigen::Vector3d* out_bearing_vector) const
 {
-  CHECK_NOTNULL(out_bearing_vector);
+  // CHECK_NOTNULL(out_bearing_vector);
   const Eigen::Vector2d rectified =
       affine_correction_inverse_ * (keypoint - principal_point_);
   const double rho = rectified.norm();
@@ -53,7 +53,7 @@ void OmniProjection::project3(
     Eigen::Vector2d* out_keypoint,
     Eigen::Matrix<double, 2, 3>* out_jacobian_point) const
 {
-  CHECK_NOTNULL(out_keypoint);
+  // CHECK_NOTNULL(out_keypoint);
 
   const double x = point_3d[0];
   const double y = point_3d[1];

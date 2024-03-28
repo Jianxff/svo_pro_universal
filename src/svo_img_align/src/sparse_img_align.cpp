@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <random> // std::mt19937
 
-#include <opencv2/highgui/highgui.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 
 #include <vikit/vision.h>
 #include <vikit/math_utils.h>
@@ -35,8 +35,8 @@ size_t SparseImgAlign::run(
     const FrameBundle::Ptr& ref_frames,
     const FrameBundle::Ptr& cur_frames)
 {
-  CHECK(!ref_frames->empty());
-  CHECK_EQ(ref_frames->size(), cur_frames->size());
+  // CHECK(!ref_frames->empty());
+  // CHECK_EQ(ref_frames->size(), cur_frames->size());
 
   // Select all visible features and subsample if required.
   fts_vec_.clear();
@@ -198,8 +198,8 @@ void  SparseImgAlign::finishIteration()
     cv::Mat residual_image_rgb;
     cv::merge(residual_image_rgb_vec, residual_image_rgb);
 
-    cv::imshow("residual_image", residual_image_rgb);
-    cv::waitKey(0);
+    // cv::imshow("residual_image", residual_image_rgb);
+    // cv::waitKey(0);
   }
 }
 

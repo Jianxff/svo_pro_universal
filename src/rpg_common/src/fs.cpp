@@ -3,7 +3,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace rpg_common
 {

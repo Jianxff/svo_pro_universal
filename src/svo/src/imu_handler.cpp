@@ -8,12 +8,13 @@
 #include "svo/imu_handler.h"
 
 #include <numeric>
+#include <functional>
 
 #include <vikit/math_utils.h>
-#include <vikit/csv_utils.h>
+// #include <vikit/csv_utils.h>
 #include <vikit/timer.h>
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#include <yaml-cpp/yaml.h>
+// #include <yaml-cpp/yaml.h>
 #pragma diagnostic pop
 
 namespace
@@ -25,8 +26,7 @@ double stdVec(const std::vector<double>& v)
   double mean = sum / v.size();
 
   std::vector<double> diff(v.size());
-  std::transform(v.begin(), v.end(), diff.begin(),
-                 std::bind2nd(std::minus<double>(), mean));
+  std::transform(v.begin(), v.end(), diff.begin(), [mean](double x){ return x - mean;});
   double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
   double stdev = std::sqrt(sq_sum / v.size());
 
@@ -308,132 +308,132 @@ bool ImuHandler::addImuMeasurement(
   return true;
 }
 
-bool ImuHandler::loadImuMeasurementsFromFile(const std::string& filename)
-{
-  ulock_t lock(measurements_mut_);
-  std::ifstream fs(filename.c_str());
-  if(!fs.is_open())
-  {
-    LOG(WARNING) << "Could not open imu file: " << filename;
-    return false;
-  }
+// bool ImuHandler::loadImuMeasurementsFromFile(const std::string& filename)
+// {
+//   ulock_t lock(measurements_mut_);
+//   std::ifstream fs(filename.c_str());
+//   if(!fs.is_open())
+//   {
+//     LOG(WARNING) << "Could not open imu file: " << filename;
+//     return false;
+//   }
 
-  // add all imu messages to imu-handler
-  size_t n = 0;
-  while(fs.good() && !fs.eof())
-  {
-    if(fs.peek() == '#') // skip comments
-      fs.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    size_t imu_id;
-    double stamp, wx, wy, wz, ax, ay, az;
-    fs >> imu_id >> stamp >> wx >> wy >> wz >> ax >> ay >> az;
+//   // add all imu messages to imu-handler
+//   size_t n = 0;
+//   while(fs.good() && !fs.eof())
+//   {
+//     if(fs.peek() == '#') // skip comments
+//       fs.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+//     size_t imu_id;
+//     double stamp, wx, wy, wz, ax, ay, az;
+//     fs >> imu_id >> stamp >> wx >> wy >> wz >> ax >> ay >> az;
 
-//    // DEBUG **************************
-//    if(imu_id % 10 != 0)
-//      continue;
-//    // ********************************
+// //    // DEBUG **************************
+// //    if(imu_id % 10 != 0)
+// //      continue;
+// //    // ********************************
 
-    const Eigen::Vector3d omega(wx, wy, wz);
-    const Eigen::Vector3d linacc(ax, ay, az);
-    const ImuMeasurement m(stamp, omega, linacc);
-    measurements_.push_front(m);
-    if (options_.temporal_stationary_check)
-    {
-      temporal_imu_window_.push_front(m);
-    }
-    ++n;
-  }
-  VLOG(2) << "ImuHandler: Loaded " << n << " measurements.";
-  return true;
-}
+//     const Eigen::Vector3d omega(wx, wy, wz);
+//     const Eigen::Vector3d linacc(ax, ay, az);
+//     const ImuMeasurement m(stamp, omega, linacc);
+//     measurements_.push_front(m);
+//     if (options_.temporal_stationary_check)
+//     {
+//       temporal_imu_window_.push_front(m);
+//     }
+//     ++n;
+//   }
+//   // VLOG(2) << "ImuHandler: Loaded " << n << " measurements.";
+//   return true;
+// }
 
-bool ImuHandler::loadImuMeasurementsFromCsvFile(const std::string& filename)
-{
-  ulock_t lock(measurements_mut_);
+// bool ImuHandler::loadImuMeasurementsFromCsvFile(const std::string& filename)
+// {
+//   ulock_t lock(measurements_mut_);
 
-  // open file
-  std::ifstream csv_file_stream(filename, std::ios::in);
-  CHECK(csv_file_stream.is_open()) << "Failed to open file " << filename << ".";
-  CHECK(!csv_file_stream.eof()) << "File empty: " << filename;
+//   // open file
+//   std::ifstream csv_file_stream(filename, std::ios::in);
+//   // CHECK(csv_file_stream.is_open()) << "Failed to open file " << filename << ".";
+//   // CHECK(!csv_file_stream.eof()) << "File empty: " << filename;
 
-  // skip header
-  std::string header_line;
-  std::getline(csv_file_stream, header_line);
+//   // skip header
+//   std::string header_line;
+//   std::getline(csv_file_stream, header_line);
 
-  // read measurements
-  std::vector<std::string> fields;
-  size_t n = 0;
-  while(vk::readNextLine(7, csv_file_stream, &fields))
-  {
-    int64_t stamp_ns = vk::convertStringToLongLong(fields[0]);
-    Eigen::Vector3d omega = vk::convertStringsToEigenVector3d(fields[1], fields[2], fields[3]);
-    Eigen::Vector3d linacc = vk::convertStringsToEigenVector3d(fields[4], fields[5], fields[6]);
-    const ImuMeasurement m(
-          static_cast<double>(stamp_ns)/1e9, omega, linacc); // TODO(cfo): save uint64_t timestamps!!!
-    measurements_.push_front(m);
-    if (options_.temporal_stationary_check)
-    {
-      temporal_imu_window_.push_front(m);
-    }
-    ++n;
-  }
+//   // read measurements
+//   std::vector<std::string> fields;
+//   size_t n = 0;
+//   while(vk::readNextLine(7, csv_file_stream, &fields))
+//   {
+//     int64_t stamp_ns = vk::convertStringToLongLong(fields[0]);
+//     Eigen::Vector3d omega = vk::convertStringsToEigenVector3d(fields[1], fields[2], fields[3]);
+//     Eigen::Vector3d linacc = vk::convertStringsToEigenVector3d(fields[4], fields[5], fields[6]);
+//     const ImuMeasurement m(
+//           static_cast<double>(stamp_ns)/1e9, omega, linacc); // TODO(cfo): save uint64_t timestamps!!!
+//     measurements_.push_front(m);
+//     if (options_.temporal_stationary_check)
+//     {
+//       temporal_imu_window_.push_front(m);
+//     }
+//     ++n;
+//   }
 
-  VLOG(2) << "ImuHandler: Loaded " << n << " measurements.";
-  return true;
-}
+//   // VLOG(2) << "ImuHandler: Loaded " << n << " measurements.";
+//   return true;
+// }
 
-ImuCalibration ImuHandler::loadCalibrationFromFile(const std::string& filename)
-{
-  YAML::Node data = YAML::LoadFile(filename);
-  ImuCalibration calib;
-  if(data["imu_params"].IsDefined())
-  {
-    calib.delay_imu_cam = data["imu_params"]["delay_imu_cam"].as<double>();
-    calib.max_imu_delta_t = data["imu_params"]["max_imu_delta_t"].as<double>();
-    calib.saturation_accel_max = data["imu_params"]["acc_max"].as<double>();
-    calib.saturation_omega_max = data["imu_params"]["omega_max"].as<double>();
-    calib.gyro_noise_density = data["imu_params"]["sigma_omega_c"].as<double>();
-    calib.acc_noise_density = data["imu_params"]["sigma_acc_c"].as<double>();
-    calib.gyro_bias_random_walk_sigma = data["imu_params"]["sigma_omega_bias_c"].as<double>();
-    calib.acc_bias_random_walk_sigma = data["imu_params"]["sigma_acc_bias_c"].as<double>();
-    calib.gravity_magnitude = data["imu_params"]["g"].as<double>();
-    calib.imu_rate = data["imu_params"]["imu_rate"].as<double>();
-  }
-  else
-  {
-    LOG(FATAL) << "Could not load IMU calibration from file";
-  }
-  return calib;
-}
+// ImuCalibration ImuHandler::loadCalibrationFromFile(const std::string& filename)
+// {
+//   YAML::Node data = YAML::LoadFile(filename);
+//   ImuCalibration calib;
+//   if(data["imu_params"].IsDefined())
+//   {
+//     calib.delay_imu_cam = data["imu_params"]["delay_imu_cam"].as<double>();
+//     calib.max_imu_delta_t = data["imu_params"]["max_imu_delta_t"].as<double>();
+//     calib.saturation_accel_max = data["imu_params"]["acc_max"].as<double>();
+//     calib.saturation_omega_max = data["imu_params"]["omega_max"].as<double>();
+//     calib.gyro_noise_density = data["imu_params"]["sigma_omega_c"].as<double>();
+//     calib.acc_noise_density = data["imu_params"]["sigma_acc_c"].as<double>();
+//     calib.gyro_bias_random_walk_sigma = data["imu_params"]["sigma_omega_bias_c"].as<double>();
+//     calib.acc_bias_random_walk_sigma = data["imu_params"]["sigma_acc_bias_c"].as<double>();
+//     calib.gravity_magnitude = data["imu_params"]["g"].as<double>();
+//     calib.imu_rate = data["imu_params"]["imu_rate"].as<double>();
+//   }
+//   else
+//   {
+//     LOG(FATAL) << "Could not load IMU calibration from file";
+//   }
+//   return calib;
+// }
 
-ImuInitialization ImuHandler::loadInitializationFromFile(const std::string& filename)
-{
-  YAML::Node data = YAML::LoadFile(filename);
-  ImuInitialization init;
-  if(data["imu_initialization"].IsDefined())
-  {
-    init.velocity = Eigen::Vector3d(
-          data["imu_initialization"]["velocity"][0].as<double>(),
-          data["imu_initialization"]["velocity"][1].as<double>(),
-          data["imu_initialization"]["velocity"][2].as<double>());
-    init.omega_bias = Eigen::Vector3d(
-          data["imu_initialization"]["omega_bias"][0].as<double>(),
-          data["imu_initialization"]["omega_bias"][1].as<double>(),
-          data["imu_initialization"]["omega_bias"][2].as<double>());
-    init.acc_bias = Eigen::Vector3d(
-          data["imu_initialization"]["acc_bias"][0].as<double>(),
-          data["imu_initialization"]["acc_bias"][1].as<double>(),
-          data["imu_initialization"]["acc_bias"][2].as<double>());
-    init.velocity_sigma = data["imu_initialization"]["velocity_sigma"].as<double>();
-    init.omega_bias_sigma = data["imu_initialization"]["omega_bias_sigma"].as<double>();
-    init.acc_bias_sigma = data["imu_initialization"]["acc_bias_sigma"].as<double>();
-  }
-  else
-  {
-    LOG(FATAL) << "Could not load IMU initialization from file";
-  }
-  return init;
-}
+// ImuInitialization ImuHandler::loadInitializationFromFile(const std::string& filename)
+// {
+//   YAML::Node data = YAML::LoadFile(filename);
+//   ImuInitialization init;
+//   if(data["imu_initialization"].IsDefined())
+//   {
+//     init.velocity = Eigen::Vector3d(
+//           data["imu_initialization"]["velocity"][0].as<double>(),
+//           data["imu_initialization"]["velocity"][1].as<double>(),
+//           data["imu_initialization"]["velocity"][2].as<double>());
+//     init.omega_bias = Eigen::Vector3d(
+//           data["imu_initialization"]["omega_bias"][0].as<double>(),
+//           data["imu_initialization"]["omega_bias"][1].as<double>(),
+//           data["imu_initialization"]["omega_bias"][2].as<double>());
+//     init.acc_bias = Eigen::Vector3d(
+//           data["imu_initialization"]["acc_bias"][0].as<double>(),
+//           data["imu_initialization"]["acc_bias"][1].as<double>(),
+//           data["imu_initialization"]["acc_bias"][2].as<double>());
+//     init.velocity_sigma = data["imu_initialization"]["velocity_sigma"].as<double>();
+//     init.omega_bias_sigma = data["imu_initialization"]["omega_bias_sigma"].as<double>();
+//     init.acc_bias_sigma = data["imu_initialization"]["acc_bias_sigma"].as<double>();
+//   }
+//   else
+//   {
+//     LOG(FATAL) << "Could not load IMU initialization from file";
+//   }
+//   return init;
+// }
 
 bool ImuHandler::getAngularVelocity(
     double timestamp,
@@ -482,7 +482,7 @@ bool ImuHandler::getInitialAttitude(
   C_imu_world.col(1) = y;
   C_imu_world.col(2) = z;
 
-  VLOG(3) << "Initial Rotation = " << C_imu_world;
+  // VLOG(3) << "Initial Rotation = " << C_imu_world;
 
   R_imu_world = Quaternion(C_imu_world);
   return true;
@@ -501,7 +501,7 @@ IMUTemporalStatus ImuHandler::checkTemporalStatus(const double time_sec)
 
   if (!options_.temporal_stationary_check)
   {
-    CHECK_EQ(temporal_imu_window_.size(), 0u);
+    // CHECK_EQ(temporal_imu_window_.size(), 0u);
     LOG(WARNING) << "Stationary check is not enabled. Will assume moving.";
     return res;
   }
@@ -521,7 +521,7 @@ IMUTemporalStatus ImuHandler::checkTemporalStatus(const double time_sec)
         temporal_imu_window_[idx].timestamp_ < time_sec)
     {
       // we know the first is not the start point
-      CHECK_GT(idx, 0u);
+      // CHECK_GT(idx, 0u);
       start_idx = idx - 1;
       continue;
     }
@@ -599,7 +599,7 @@ bool ImuHandler::waitTill(const double img_timestamp_sec,
     }
     wait_time.resume();
     // wait
-    VLOG(50) << "Waiting for imu measurements.";
+    // VLOG(50) << "Waiting for imu measurements.";
   }
 
   return true;

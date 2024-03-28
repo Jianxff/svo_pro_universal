@@ -20,8 +20,8 @@ Keypoints generateRandomKeypoints(const uint32_t image_width,
     const uint32_t margin,
     const uint32_t num_keypoints)
 {
-  DEBUG_CHECK_GT(image_width, margin + 1u);
-  DEBUG_CHECK_GT(image_height, margin + 1u);
+  // DEBUG_CHECK_GT(image_width, margin + 1u);
+  // DEBUG_CHECK_GT(image_height, margin + 1u);
 
   Keypoints kp(2, num_keypoints);
   for(uint32_t i = 0u; i < num_keypoints; ++i)
@@ -40,8 +40,8 @@ Keypoints generateUniformKeypoints(const uint32_t image_width,
     const uint32_t margin,
     const uint32_t num_cols)
 {
-  DEBUG_CHECK_GT(image_width, margin + 1u);
-  DEBUG_CHECK_GT(image_height, margin + 1u);
+  // DEBUG_CHECK_GT(image_width, margin + 1u);
+  // DEBUG_CHECK_GT(image_height, margin + 1u);
   const uint32_t num_rows = num_cols * image_height / image_width;
 
   // Compute width and height of a cell:
@@ -92,8 +92,8 @@ FloatType overlappingFieldOfView(
     const uint32_t cam_A,
     const uint32_t cam_B)
 {
-  DEBUG_CHECK_LT(cam_A, rig.getNumCameras());
-  DEBUG_CHECK_LT(cam_B, rig.getNumCameras());
+  // DEBUG_CHECK_LT(cam_A, rig.getNumCameras());
+  // DEBUG_CHECK_LT(cam_B, rig.getNumCameras());
 
   // We sample uniformly keypoints in camera a and project them into camera b,
   // assuming the landmark is at infinity (i.e. only rotate).

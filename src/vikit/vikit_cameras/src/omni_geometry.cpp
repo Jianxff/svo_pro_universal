@@ -1,6 +1,6 @@
 #include "vikit/cameras/omni_geometry.h"
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace vk {
 namespace cameras {
@@ -16,11 +16,11 @@ OmniGeometry::OmniGeometry(
 {
   if (mask_relative_radii != kDontMask)
   {
-    CHECK_GE(mask_relative_radii(0), 0.0);
-    CHECK_LE(mask_relative_radii(1), 1.0);
-    CHECK_LT(mask_relative_radii(0), mask_relative_radii(1));
-    CHECK_GE(width, height) << "Only cameras whose width is larger than its "
-        << "height are supported";
+    // CHECK_GE(mask_relative_radii(0), 0.0);
+    // CHECK_LE(mask_relative_radii(1), 1.0);
+    // CHECK_LT(mask_relative_radii(0), mask_relative_radii(1));
+    // CHECK_GE(width, height) << "Only cameras whose width is larger than its "
+        // << "height are supported";
 
     const int radius = height/2;
     const double low_radius_sqaured =

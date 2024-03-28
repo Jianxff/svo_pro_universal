@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <Eigen/Core>
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace vk {
 namespace cameras {
@@ -22,7 +22,7 @@ public:
   RadialTangentialDistortion(
       const Eigen::VectorXd& parameters)
   {
-    CHECK(parameters.size() == 4);
+    // CHECK(parameters.size() == 4);
     k1_ = parameters(0);
     k2_ = parameters(1);
     p1_ = parameters(2);

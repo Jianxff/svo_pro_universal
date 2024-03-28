@@ -32,7 +32,7 @@ void GpuCacheHandler::setPatchArea(const size_t patch_area)
 
 void GpuCacheHandler::reserveFeatureCapacity(const size_t capacity)
 {
-  CHECK_GT(patch_area_,0);
+  // CHECK_GT(patch_area_,0);
   // Check if enough or to much memory is allocated.
   if( (capacity > feature_capacity_) || (feature_capacity_ - capacity > kMaxStorageSurplus))
   {

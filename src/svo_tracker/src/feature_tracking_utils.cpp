@@ -11,8 +11,8 @@ double getTracksDisparityPercentile(
     const FeatureTracks& tracks,
     double pivot_ratio)
 {
-  CHECK_GT(pivot_ratio, 0.0) << "pivot_ratio needs to be in (0,1)";
-  CHECK_LT(pivot_ratio, 1.0) << "pivot_ratio needs to be in (0,1)";
+  // CHECK_GT(pivot_ratio, 0.0) << "pivot_ratio needs to be in (0,1)";
+  // CHECK_LT(pivot_ratio, 1.0) << "pivot_ratio needs to be in (0,1)";
 
   if(tracks.empty())
     return 0.0;
@@ -25,7 +25,7 @@ double getTracksDisparityPercentile(
 
   // compute percentile.
   const size_t pivot = std::floor(pivot_ratio * disparities.size());
-  CHECK_LT(pivot, disparities.size());
+  // CHECK_LT(pivot, disparities.size());
   std::nth_element(disparities.begin(), disparities.begin() + pivot, disparities.end(),
                    std::greater<double>());
   return disparities[pivot];
@@ -35,7 +35,7 @@ void getFeatureMatches(
     const Frame& frame1, const Frame& frame2,
     std::vector<std::pair<size_t, size_t>>* matches_12)
 {
-  CHECK_NOTNULL(matches_12);
+  // CHECK_NOTNULL(matches_12);
 
   // Create lookup-table with track-ids from frame 1.
   std::unordered_map<int, size_t> trackid_slotid_map;

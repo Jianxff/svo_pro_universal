@@ -26,13 +26,13 @@
 #define MINKINDR_MINIMAL_COMMON_H
 
 #include <Eigen/Core>
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace kindr {
 namespace minimal {
 
 inline void skewMatrix(const Eigen::Vector3d& v, Eigen::Matrix3d * skew) {
-  CHECK_NOTNULL(skew);
+  // CHECK_NOTNULL(skew);
   skew->setZero();
   (*skew)(0,1) = -v[2];
   (*skew)(1,0) =  v[2];
@@ -43,7 +43,7 @@ inline void skewMatrix(const Eigen::Vector3d& v, Eigen::Matrix3d * skew) {
 }
 
 inline void skewMatrix(const Eigen::Vector3d& v, Eigen::Map<Eigen::Matrix3d> * skew) {
-  CHECK_NOTNULL(skew);
+  // CHECK_NOTNULL(skew);
   skew->setZero();
   (*skew)(0,1) = -v[2];
   (*skew)(1,0) =  v[2];

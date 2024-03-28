@@ -1,7 +1,7 @@
 #include "vikit/solver/mini_least_squares_solver.h"
 
 #include <stdexcept>
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace vk {
 namespace solver {
@@ -66,19 +66,19 @@ void MiniLeastSquaresSolver<D, T, Implementation>::optimizeGaussNewton(State& st
     // solve the linear system
     if(!solve(H_, g_, dx_))
     {
-      LOG(WARNING) << "Matrix is close to singular! Stop Optimizing."
-                   << "H = " << H_ << "g = " << g_;
+      // LOG(WARNING) << "Matrix is close to singular! Stop Optimizing."
+      //              << "H = " << H_ << "g = " << g_;
       stop_ = true;
     }
 
     // check if error increased since last optimization
     if((iter_ > 0 && new_chi2 > chi2_ && solver_options_.stop_when_error_increases) || stop_)
     {
-      VLOG(400) << "It. " << iter_
-                << "\t Failure"
-                << "\t new_chi2 = " << new_chi2
-                << "\t n_meas = " << n_meas_
-                << "\t Error increased. Stop optimizing.";
+      // VLOG(400) << "It. " << iter_
+                // << "\t Failure"
+                // << "\t new_chi2 = " << new_chi2
+                // << "\t n_meas = " << n_meas_
+                // << "\t Error increased. Stop optimizing.";
       state = old_state; // rollback
       break;
     }
@@ -90,17 +90,17 @@ void MiniLeastSquaresSolver<D, T, Implementation>::optimizeGaussNewton(State& st
     state = new_state;
     chi2_ = new_chi2;
     double x_norm = utils::norm_max(dx_);
-    VLOG(400) << "It. " << iter_
-              << "\t Success"
-              << "\t new_chi2 = " << new_chi2
-              << "\t n_meas = " << n_meas_
-              << "\t x_norm = " << x_norm;
+    // VLOG(400) << "It. " << iter_
+              // << "\t Success"
+              // << "\t new_chi2 = " << new_chi2
+              // << "\t n_meas = " << n_meas_
+              // << "\t x_norm = " << x_norm;
     finishIteration();
 
     // stop when converged, i.e. update step too small
     if(x_norm < solver_options_.eps)
     {
-      VLOG(400) << "Converged, x_norm " << x_norm << " < " << solver_options_.eps;
+      // VLOG(400) << "Converged, x_norm " << x_norm << " < " << solver_options_.eps;
       break;
     }
   }
@@ -115,8 +115,8 @@ void MiniLeastSquaresSolver<D, T, Implementation>::optimizeLevenbergMarquardt(St
 
   // compute the initial error
   chi2_ = evaluateError(state, nullptr, nullptr);
-  VLOG(400) << "init chi2 = " << chi2_
-          << "\t n_meas = " << n_meas_;
+  // VLOG(400) << "init chi2 = " << chi2_
+          // << "\t n_meas = " << n_meas_;
 
   // TODO: compute initial lambda
   // Hartley and Zisserman: "A typical init value of lambda is 10^-3 times the
@@ -176,8 +176,8 @@ void MiniLeastSquaresSolver<D, T, Implementation>::optimizeLevenbergMarquardt(St
       }
       else
       {
-        LOG(WARNING) << "Matrix is close to singular! Stop Optimizing."
-                     << "H = " << H_ << "g = " << g_;
+        // LOG(WARNING) << "Matrix is close to singular! Stop Optimizing."
+        //              << "H = " << H_ << "g = " << g_;
         rho_ = -1;
       }
 
@@ -189,13 +189,13 @@ void MiniLeastSquaresSolver<D, T, Implementation>::optimizeLevenbergMarquardt(St
         stop_ = utils::norm_max(dx_) < solver_options_.eps;
         mu_ *= std::max(1./3., std::min(1.-std::pow(2*rho_-1,3), 2./3.));
         nu_ = 2.;
-        VLOG(400) << "It. " << iter_
-                  << "\t Trial " << trials_
-                  << "\t Success"
-                  << "\t n_meas = " << n_meas_
-                  << "\t new_chi2 = " << new_chi2
-                  << "\t mu = " << mu_
-                  << "\t nu = " << nu_;
+        // VLOG(400) << "It. " << iter_
+                  // << "\t Trial " << trials_
+                  // << "\t Success"
+                  // << "\t n_meas = " << n_meas_
+                  // << "\t new_chi2 = " << new_chi2
+                  // << "\t mu = " << mu_
+                  // << "\t nu = " << nu_;
       }
       else
       {
@@ -206,13 +206,13 @@ void MiniLeastSquaresSolver<D, T, Implementation>::optimizeLevenbergMarquardt(St
         if (trials_ >= solver_options_.max_trials)
           stop_ = true;
 
-        VLOG(400) << "It. " << iter_
-                  << "\t Trial " << trials_
-                  << "\t Failure"
-                  << "\t n_meas = " << n_meas_
-                  << "\t new_chi2 = " << new_chi2
-                  << "\t mu = " << mu_
-                  << "\t nu = " << nu_;
+        // VLOG(400) << "It. " << iter_
+                  // << "\t Trial " << trials_
+                  // << "\t Failure"
+                  // << "\t n_meas = " << n_meas_
+                  // << "\t new_chi2 = " << new_chi2
+                  // << "\t mu = " << mu_
+                  // << "\t nu = " << nu_;
       }
       finishTrial();
 

@@ -25,7 +25,7 @@
 #ifndef KINDR_MIN_ROTATION_QUATERNION_INL_H_
 #define KINDR_MIN_ROTATION_QUATERNION_INL_H_
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 #include <kindr/minimal/rotation-quaternion.h>
 #include <kindr/minimal/angle-axis.h>
 
@@ -60,8 +60,8 @@ template<typename Scalar>
 RotationQuaternionTemplate<Scalar>::RotationQuaternionTemplate(
     Scalar w, Scalar x, Scalar y, Scalar z) :
     q_A_B_(w,x,y,z) {
-  CHECK_NEAR(squaredNorm(), static_cast<Scalar>(1.0), 
-             EPS<Scalar>::normalization_value());
+  // CHECK_NEAR(squaredNorm(), static_cast<Scalar>(1.0), 
+            //  EPS<Scalar>::normalization_value());
 }
 
 /// \brief initialize from real and imaginary components
@@ -70,8 +70,8 @@ RotationQuaternionTemplate<Scalar>::RotationQuaternionTemplate(
     Scalar real,
     const typename RotationQuaternionTemplate<Scalar>::Vector3& imaginary) :
     q_A_B_(real, imaginary[0], imaginary[1], imaginary[2]){
-  CHECK_NEAR(squaredNorm(), static_cast<Scalar>(1.0),
-             EPS<Scalar>::normalization_value());
+  // CHECK_NEAR(squaredNorm(), static_cast<Scalar>(1.0),
+            //  EPS<Scalar>::normalization_value());
 }
 
 /// \brief initialize from an Eigen quaternion
@@ -79,8 +79,8 @@ template<typename Scalar>
 RotationQuaternionTemplate<Scalar>::RotationQuaternionTemplate(
     const Implementation& quaternion) :
     q_A_B_(quaternion){
-  CHECK_NEAR(squaredNorm(), static_cast<Scalar>(1.0),
-             EPS<Scalar>::normalization_value());
+  // CHECK_NEAR(squaredNorm(), static_cast<Scalar>(1.0),
+            //  EPS<Scalar>::normalization_value());
 }
 
 namespace detail {
@@ -112,7 +112,7 @@ template<typename Scalar>
 RotationQuaternionTemplate<Scalar>::RotationQuaternionTemplate(
     const RotationMatrix& matrix) :
     q_A_B_(matrix) {
-  CHECK(isValidRotationMatrix(matrix)) << matrix;
+  // CHECK(isValidRotationMatrix(matrix)) << matrix;
 }
 
 template<typename Scalar>
@@ -121,8 +121,8 @@ RotationQuaternionTemplate<Scalar>::fromApproximateRotationMatrix(
     const RotationMatrix& matrix) {
   // We still want the input matrix to resemble a rotation matrix to avoid
   // bug hiding.
-  CHECK(isValidRotationMatrix(
-      matrix, static_cast<Scalar>(EPS<float>::normalization_value())));
+  // CHECK(isValidRotationMatrix(
+      // matrix, static_cast<Scalar>(EPS<float>::normalization_value())));
   // http://people.csail.mit.edu/bkph/articles/Nearest_Orthonormal_Matrix.pdf
   // as discussed in https://github.com/ethz-asl/kindr/issues/55 ,
   // code by Philipp Krüsi.
@@ -208,8 +208,8 @@ template<typename Scalar>
 void RotationQuaternionTemplate<Scalar>::setValues(Scalar w, Scalar x,
                                                    Scalar y, Scalar z) {
   q_A_B_ = Implementation(w,x,y,z);
-  CHECK_NEAR(squaredNorm(), static_cast<Scalar>(1.0),
-             static_cast<Scalar>(1e-4));
+  // CHECK_NEAR(squaredNorm(), static_cast<Scalar>(1.0),
+            //  static_cast<Scalar>(1e-4));
 }
 
 /// \brief set the quaternion by its real and imaginary parts
@@ -217,8 +217,8 @@ template<typename Scalar>
 void RotationQuaternionTemplate<Scalar>::setParts(Scalar real,
                                                   const Imaginary& imag) {
   q_A_B_ = Implementation(real, imag[0], imag[1], imag[2]);
-  CHECK_NEAR(squaredNorm(), static_cast<Scalar>(1.0),
-             static_cast<Scalar>(1e-4));
+  // CHECK_NEAR(squaredNorm(), static_cast<Scalar>(1.0),
+            //  static_cast<Scalar>(1e-4));
 }
 
 
@@ -330,7 +330,7 @@ template<typename Scalar>
 typename RotationQuaternionTemplate<Scalar>::Matrix3X
 RotationQuaternionTemplate<Scalar>::rotateVectorized(
     const typename RotationQuaternionTemplate<Scalar>::Matrix3X& v) const {
-  CHECK_GT(v.cols(), 0);
+  // CHECK_GT(v.cols(), 0);
   return q_A_B_.toRotationMatrix() * v;
 }
 
@@ -405,9 +405,9 @@ template<typename Scalar>
 RotationQuaternionTemplate<Scalar>
 RotationQuaternionTemplate<Scalar>::operator*(
     const RotationQuaternionTemplate<Scalar>& rhs) const {
-  CHECK(!std::is_arithmetic<Scalar>::value) << "Please provide a specialized "
-      "function for this specific arithmetic type. This function is only a "
-      "workaround for non-arithmetic types.";
+  // CHECK(!std::is_arithmetic<Scalar>::value) << "Please provide a specialized "
+      // "function for this specific arithmetic type. This function is only a "
+      // "workaround for non-arithmetic types.";
   Implementation result = q_A_B_ * rhs.q_A_B_;
 
   // Check if the multiplication has resulted in the quaternion no longer being
@@ -578,7 +578,7 @@ RotationQuaternionTemplate<Scalar>::cast() const {
 
 template <typename Scalar>
 void RotationQuaternionTemplate<Scalar>::normalizationHelper(Implementation* quaternion) const {
-  CHECK_NOTNULL(quaternion);
+  // CHECK_NOTNULL(quaternion);
   // check if the multiplication has resulted in the quaternion no longer being
   // approximately normalized.
   if (std::abs(quaternion->squaredNorm() - static_cast<Scalar>(1)) >

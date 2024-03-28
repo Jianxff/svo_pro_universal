@@ -10,7 +10,7 @@
 
 #include <list>
 #include <string>
-#include <glog/logging.h>
+// #include <glog/logging.h>
 #include <vikit/math_utils.h>
 #include <opencv2/core/core.hpp>
 #include <fstream>
@@ -26,7 +26,7 @@ void loadBlenderDepthmap(
     cv::Mat& z_map)
 {
   std::ifstream file_stream(file_name.c_str());
-  CHECK(file_stream.is_open()) << "file '" << file_name << "' could not be opened.";
+  // CHECK(file_stream.is_open()) << "file '" << file_name << "' could not be opened.";
   z_map = cv::Mat(img_height, img_width, CV_32FC1);
   float * img_ptr = z_map.ptr<float>();
   float depth;

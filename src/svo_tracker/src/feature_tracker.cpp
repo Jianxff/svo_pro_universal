@@ -34,13 +34,13 @@ void FeatureTracker::trackAndDetect(const FrameBundlePtr& nframe_kp1)
   size_t n_tracked = trackFrameBundle(nframe_kp1);
   if(n_tracked < options_.min_tracks_to_detect_new_features)
   {
-    VLOG(4) << "Tracker: Detect new features";
+    // VLOG(4) << "Tracker: Detect new features";
     if(options_.reset_before_detection)
     {
-      VLOG(4) << "Tracker: reset.";
+      // VLOG(4) << "Tracker: reset.";
       resetActiveTracks();
 
-      VLOG(4) << "*** Tracker has " << active_tracks_.at(0).size();
+      // VLOG(4) << "*** Tracker has " << active_tracks_.at(0).size();
 
       for(const FramePtr& frame : nframe_kp1->frames_)
         frame->clearFeatureStorage();
@@ -115,7 +115,7 @@ size_t FeatureTracker::trackFrameBundle(const FrameBundlePtr& nframe_kp1)
     frame_utils::computeNormalizedBearingVectors(
           cur_frame->px_vec_, *cur_frame->cam(), &cur_frame->f_vec_);
 
-    VLOG(4) << "Tracker: Frame-" << frame_index << " - tracked = " << new_keypoints_counter;
+    // VLOG(4) << "Tracker: Frame-" << frame_index << " - tracked = " << new_keypoints_counter;
   }
 
   return getTotalActiveTracks();
@@ -123,8 +123,8 @@ size_t FeatureTracker::trackFrameBundle(const FrameBundlePtr& nframe_kp1)
 
 size_t FeatureTracker::initializeNewTracks(const FrameBundlePtr& nframe)
 {
-  CHECK_EQ(nframe->size(), detectors_.size());
-  CHECK_EQ(nframe->size(), active_tracks_.size());
+  // CHECK_EQ(nframe->size(), detectors_.size());
+  // CHECK_EQ(nframe->size(), active_tracks_.size());
 
 
   for(size_t frame_index = 0; frame_index < bundle_size_; ++frame_index)
@@ -150,7 +150,7 @@ size_t FeatureTracker::initializeNewTracks(const FrameBundlePtr& nframe)
     std::vector<bool> success;
     frame->cam()->backProject3(new_px, &new_f, &success);
     for (const bool s : success) {
-      CHECK(s);
+      // CHECK(s);
     }
 
     new_f = new_f.array().rowwise() / new_f.colwise().norm().array();
@@ -178,8 +178,8 @@ size_t FeatureTracker::initializeNewTracks(const FrameBundlePtr& nframe)
       frame->track_id_vec_(feature_index) = new_track_id;
     }
 
-    VLOG(4) << "Tracker: Frame-" << frame_index << " - detected = " << n_new
-            << ", total = " << n_new + n_old;
+    // VLOG(4) << "Tracker: Frame-" << frame_index << " - detected = " << n_new
+            // << ", total = " << n_new + n_old;
   }
 
   return getTotalActiveTracks();
@@ -187,7 +187,7 @@ size_t FeatureTracker::initializeNewTracks(const FrameBundlePtr& nframe)
 
 const FeatureTracks& FeatureTracker::getActiveTracks(size_t frame_index) const
 {
-  CHECK_LT(frame_index, active_tracks_.size());
+  // CHECK_LT(frame_index, active_tracks_.size());
   return active_tracks_.at(frame_index);
 }
 
@@ -204,8 +204,8 @@ void FeatureTracker::getNumTrackedAndDisparityPerFrame(
     std::vector<size_t>* num_tracked,
     std::vector<double>* disparity) const
 {
-  CHECK_NOTNULL(num_tracked);
-  CHECK_NOTNULL(disparity);
+  // CHECK_NOTNULL(num_tracked);
+  // CHECK_NOTNULL(disparity);
   num_tracked->resize(bundle_size_);
   disparity->resize(bundle_size_);
 
@@ -219,9 +219,9 @@ void FeatureTracker::getNumTrackedAndDisparityPerFrame(
 
 FrameBundlePtr FeatureTracker::getOldestFrameInTrack(size_t frame_index) const
 {
-  CHECK_LT(frame_index, active_tracks_.size());
+  // CHECK_LT(frame_index, active_tracks_.size());
   const FeatureTrack& track = active_tracks_.at(frame_index).front();
-  CHECK(!track.empty());
+  // CHECK(!track.empty());
   return track.at(0).getFrameBundle();
 }
 

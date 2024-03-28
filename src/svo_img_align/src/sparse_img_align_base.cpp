@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <random> // std::mt19937
 
-#include <opencv2/highgui/highgui.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 
 #include <vikit/vision.h>
 #include <vikit/math_utils.h>

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <glog/logging.h>
+// #include <glog/logging.h>
 #include <vikit/cameras/pinhole_projection.h>
 
 namespace vk {
@@ -17,7 +17,7 @@ PinholeProjection<Distortion>::PinholeProjection(
     const Eigen::VectorXd& intrinsics, distortion_t distortion)
   : distortion_(distortion)
 {
-  CHECK(intrinsics.size() == 4);
+  // CHECK(intrinsics.size() == 4);
   fx_ = intrinsics(0);
   fy_ = intrinsics(1);
   cx_ = intrinsics(2);

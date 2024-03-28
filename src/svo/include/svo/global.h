@@ -40,10 +40,10 @@ namespace svo
 
   typedef std::shared_ptr<vk::PerformanceMonitor> PerformanceMonitorPtr;
 
-  extern PerformanceMonitorPtr g_permon;
-  #define SVO_LOG(name, value) g_permon->log(std::string(name),(value))
-  #define SVO_START_TIMER(name) g_permon->startTimer((name))
-  #define SVO_STOP_TIMER(name) g_permon->stopTimer((name))
+  // extern PerformanceMonitorPtr g_permon;
+  // #define SVO_LOG(name, value) g_permon->log(std::string(name),(value))
+  // #define SVO_START_TIMER(name) g_permon->startTimer((name))
+  // #define SVO_STOP_TIMER(name) g_permon->stopTimer((name))
 
 
   // forward declaration of modules

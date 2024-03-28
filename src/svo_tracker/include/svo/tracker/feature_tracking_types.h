@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 #include <svo/common/types.h>
 
 namespace svo {
@@ -103,18 +103,18 @@ public:
 
   /// The feature at the front is the first observed feature.
   inline const FeatureRef& front() const {
-    CHECK(!empty()) << "Track empty when calling front().";
+    // CHECK(!empty()) << "Track empty when calling front().";
     return feature_track_.front();
   }
 
   /// The feature at the back is the last observed feature.
   inline const FeatureRef& back() const {
-    CHECK(!empty()) << "Track empty when calling back().";
+    // CHECK(!empty()) << "Track empty when calling back().";
     return feature_track_.back();
   }
 
   inline const FeatureRef& at(size_t i) const {
-    CHECK_LT(i, feature_track_.size()) << "Index too large.";
+    // CHECK_LT(i, feature_track_.size()) << "Index too large.";
     return feature_track_.at(i);
   }
 

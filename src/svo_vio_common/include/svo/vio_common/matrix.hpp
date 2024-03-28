@@ -75,7 +75,7 @@ template<typename Derived>
 FloatType maxAbsDiagonalElement(const Eigen::MatrixBase<Derived>& M)
 {
   FloatType max_val = 0.0f;
-  CHECK_EQ(M.cols(), M.rows());
+  // CHECK_EQ(M.cols(), M.rows());
   for (int i = 0; i < M.cols(); ++i)
   {
     max_val = std::max(max_val, std::abs(M(i,i)));

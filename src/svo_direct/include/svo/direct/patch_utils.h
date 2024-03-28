@@ -8,7 +8,8 @@
 
 #pragma once
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <svo/common/logging.h>
 #include <svo/common/types.h>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -34,7 +35,7 @@ inline void patchToMat(
     const size_t patch_width,
     cv::Mat* img)
 {
-  CHECK_NOTNULL(img);
+  // CHECK_NOTNULL(img);
   *img = cv::Mat(patch_width, patch_width, CV_8UC1);
   std::memcpy(img->data, patch_data, patch_width*patch_width);
 }
@@ -44,7 +45,7 @@ inline void normalizeAndUpsamplePatch(
     double upsample_factor,
     cv::Mat* img_rgb)
 {
-  CHECK_NOTNULL(img_rgb);
+  // CHECK_NOTNULL(img_rgb);
 
   cv::Mat patch_normalized;
   if(patch.type() == CV_32FC1)
@@ -62,7 +63,8 @@ inline void normalizeAndUpsamplePatch(
   }
   else
   {
-    LOG(FATAL) << "Image Type not supported.";
+    // LOG(FATAL) << "Image Type not supported.";
+    SVO_ERROR_STREAM("Image Type not supported.");
   }
   cv::Mat img_gray;
   cv::resize(patch_normalized, img_gray, cv::Size(0,0), upsample_factor, upsample_factor, cv::INTER_NEAREST);
@@ -81,8 +83,8 @@ inline void concatenatePatches(
   *result_rgb = cv::Mat(height, n*width, CV_32FC3);
   for(size_t i = 0; i < n; ++i)
   {
-    CHECK_EQ(width, patches[i].cols);
-    CHECK_EQ(height, patches[i].rows);
+    // CHECK_EQ(width, patches[i].cols);
+    // CHECK_EQ(height, patches[i].rows);
     cv::Mat roi(*result_rgb, cv::Rect(i*width, 0, width, height));
     cv::Mat patch_rgb(patches[i].size(), CV_32FC3);
     cv::cvtColor(patches[i], patch_rgb, cv::COLOR_GRAY2RGB);

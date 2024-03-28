@@ -4,6 +4,7 @@
 // (Robotics and Perception Group, University of Zurich, Switzerland).
 
 #include <numeric>
+#include <random>
 #include <svo/direct/matcher.h>
 #include <svo/common/point.h>
 #include <svo/common/frame.h>
@@ -26,8 +27,8 @@ void StereoTriangulation::compute(const FramePtr& frame0,
   // Check if there is something to do
   if(frame0->numLandmarks() >= options_.triangulate_n_features)
   {
-    VLOG(5) << "Calling stereo triangulation with sufficient number of features"
-        << " has no effect.";
+    // VLOG(5) << "Calling stereo triangulation with sufficient number of features"
+        // << " has no effect.";
     return;
   }
 
@@ -74,8 +75,9 @@ void StereoTriangulation::compute(const FramePtr& frame0,
         [](const FeatureType& t) { return t==FeatureType::kCorner; });
 
   // shuffle twice before we prefer corners!
-  std::random_shuffle(indices.begin(), indices.begin()+n_corners);
-  std::random_shuffle(indices.begin()+n_corners, indices.end());
+  std::random_device rd;
+  std::shuffle(indices.begin(), indices.begin()+n_corners, std::default_random_engine(rd()));
+  std::shuffle(indices.begin()+n_corners, indices.end(), std::default_random_engine(rd()));
 
   // now for all maximum corners, initialize a new seed
   size_t n_succeded = 0, n_failed = 0;
@@ -133,8 +135,8 @@ void StereoTriangulation::compute(const FramePtr& frame0,
     if(n_succeded >= n_desired)
       break;
   }
-  VLOG(20) << "Stereo: Triangulated " << n_succeded << " features,"
-           << n_failed << " failed.";
+  // VLOG(20) << "Stereo: Triangulated " << n_succeded << " features,"
+          //  << n_failed << " failed.";
 }
 
 } // namespace svo

@@ -7,7 +7,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/StdVector>
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 #include "rpg_common/eigen_hash.h"
 

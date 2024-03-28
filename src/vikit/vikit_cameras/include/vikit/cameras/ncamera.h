@@ -77,8 +77,8 @@ public:
   /// keep first N cameras
   inline void keepFirstNCams(const int N)
   {
-    CHECK_LT(N, static_cast<int>(cameras_.size()));
-    CHECK_GT(N, 0);
+    // CHECK_LT(N, static_cast<int>(cameras_.size()));
+    // CHECK_GT(N, 0);
     T_C_B_.erase(T_C_B_.begin() + N, T_C_B_.end());
     cameras_.erase(cameras_.begin() + N, cameras_.end());
   }

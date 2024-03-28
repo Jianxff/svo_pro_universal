@@ -95,14 +95,14 @@ bool AbstractInitialization::trackFeaturesAndCheckDisparity(const FrameBundlePtr
       std::accumulate(num_tracked.begin(), num_tracked.end(), 0u);
   const double avg_disparity =
       std::accumulate(disparity.begin(), disparity.end(), 0.0) / disparity.size();
-  VLOG(3) << "Init: Tracked " << num_tracked_tot << " features with disparity = " << avg_disparity;
+  // VLOG(3) << "Init: Tracked " << num_tracked_tot << " features with disparity = " << avg_disparity;
   if(num_tracked_tot < options_.init_min_features)
   {
     tracker_->resetActiveTracks();
     for(const FramePtr& frame : frames->frames_)
       frame->clearFeatureStorage();
     const size_t n = tracker_->initializeNewTracks(frames);
-    VLOG(3) << "Init: New Tracks initialized = " << n;
+    // VLOG(3) << "Init: New Tracks initialized = " << n;
     frames_ref_ = frames;
     R_ref_world_ = R_cur_world_;
     return false;
@@ -265,13 +265,13 @@ InitResult TwoPointInit::addFrameBundle(
         Quaternion(R),
         ransac.model_coefficients_.rightCols(1));
 
-  VLOG(5) << "2Pt RANSAC:" << std::endl
-          << "# Iter = " << ransac.iterations_ << std::endl
-          << "# Inliers = " << ransac.inliers_.size() << std::endl
-          << "Model = " << ransac.model_coefficients_ << std::endl
-          << "Rot prior (imu) = " << R_cur_ref << std::endl
-          << "H.rotation_matrix() = " << T_cur_from_ref_.getRotationMatrix() << std::endl
-          << "H.translation() = " << T_cur_from_ref_.getPosition();
+  // VLOG(5) << "2Pt RANSAC:" << std::endl
+          // << "# Iter = " << ransac.iterations_ << std::endl
+          // << "# Inliers = " << ransac.inliers_.size() << std::endl
+          // << "Model = " << ransac.model_coefficients_ << std::endl
+          // << "Rot prior (imu) = " << R_cur_ref << std::endl
+          // << "H.rotation_matrix() = " << T_cur_from_ref_.getRotationMatrix() << std::endl
+          // << "H.translation() = " << T_cur_from_ref_.getPosition();
 
   // Triangulate
   if(initialization_utils::triangulateAndInitializePoints(
@@ -325,8 +325,8 @@ InitResult FivePointInit::addFrameBundle(
   // enough inliers?
   if(ransac.inliers_.size() < options_.init_min_inliers)
   {
-    VLOG(3) << "5Pt RANSAC has only " << ransac.inliers_.size() << " inliers. "
-            << options_.init_min_inliers << " required.";
+    // VLOG(3) << "5Pt RANSAC has only " << ransac.inliers_.size() << " inliers. "
+            // << options_.init_min_inliers << " required.";
     return InitResult::kNoKeyframe;
   }
 
@@ -336,12 +336,12 @@ InitResult FivePointInit::addFrameBundle(
         Quaternion(R),
         ransac.model_coefficients_.rightCols(1));
 
-  VLOG(5) << "5Pt RANSAC:" << std::endl
-          << "# Iter = " << ransac.iterations_ << std::endl
-          << "# Inliers = " << ransac.inliers_.size() << std::endl
-          << "Model = " << ransac.model_coefficients_ << std::endl
-          << "T.rotation_matrix() = " << T_cur_from_ref_.getRotationMatrix() << std::endl
-          << "T.translation() = " << T_cur_from_ref_.getPosition();
+  // VLOG(5) << "5Pt RANSAC:" << std::endl
+          // << "# Iter = " << ransac.iterations_ << std::endl
+          // << "# Inliers = " << ransac.inliers_.size() << std::endl
+          // << "Model = " << ransac.model_coefficients_ << std::endl
+          // << "T.rotation_matrix() = " << T_cur_from_ref_.getRotationMatrix() << std::endl
+          // << "T.translation() = " << T_cur_from_ref_.getPosition();
 
   // Triangulate
   if(initialization_utils::triangulateAndInitializePoints(
@@ -360,7 +360,7 @@ InitResult FivePointInit::addFrameBundle(
 
 InitResult OneShotInit::addFrameBundle(const FrameBundlePtr &frames_cur)
 {
-  CHECK(frames_cur->size() == 1) << "OneShot Initialization doesn't work with Camera Array";
+  // CHECK(frames_cur->size() == 1) << "OneShot Initialization doesn't work with Camera Array";
 
   // Track and detect features.
   trackFeaturesAndCheckDisparity(frames_cur);
@@ -433,12 +433,12 @@ StereoInit::StereoInit(
 InitResult StereoInit::addFrameBundle(
     const FrameBundlePtr& frames)
 {
-  CHECK_EQ(frames->size(), 2u) << "StereoInit: Bundle has not two frames!";
+  // CHECK_EQ(frames->size(), 2u) << "StereoInit: Bundle has not two frames!";
   reset();
   frames_ref_ = frames;
 
-  VLOG(20) << "FRAME 1" << std::endl << frames->at(0)->T_world_cam() <<std::endl
-           << "FRAME 2" << std::endl << frames->at(1)->T_cam_world();
+  // VLOG(20) << "FRAME 1" << std::endl << frames->at(0)->T_world_cam() <<std::endl
+          //  << "FRAME 2" << std::endl << frames->at(1)->T_cam_world();
 
   stereo_->compute(frames->at(0), frames->at(1));
   if(frames->at(0)->numLandmarks() < options_.init_min_features)
@@ -508,7 +508,7 @@ InitResult ArrayInitGeometric::addFrameBundle(
   ransac.probability_ = 0.995;
   ransac.computeModel(1);
 
-  VLOG(5) << "RANSAC:" << std::endl
+  // VLOG(5) << "RANSAC:" << std::endl
           << "# Iter = " << ransac.iterations_ << std::endl
           << "# Inliers = " << ransac.inliers_.size() << std::endl
           << "Model = " << ransac.model_coefficients_;
@@ -544,7 +544,7 @@ InitResult ArrayInitGeometric::addFrameBundle(
     //initialization_utils::triangulatePoints(
     //      frame_cur, frame_ref, T_cur_ref,  options_.reproj_error_thresh, points_in_cur);
 
-    VLOG(3) << "-- CAMERA " << frame_cur->cam()->getLabel()
+    // VLOG(3) << "-- CAMERA " << frame_cur->cam()->getLabel()
             << ": inliers verified = " << points_in_cur.size();
 
      TODO(cfo)
@@ -811,7 +811,7 @@ void rescaleAndInitializePoints(
   {
     depth_vec.push_back(points_in_cur.col(i).norm());
   }
-  CHECK_GT(depth_vec.size(), 1u);
+  // CHECK_GT(depth_vec.size(), 1u);
   const double scene_depth_median = vk::getMedian(depth_vec);
   const double scale = depth_at_current_frame / scene_depth_median;
 
@@ -828,7 +828,7 @@ void rescaleAndInitializePoints(
     const Vector3d xyz_in_world = T_world_cur * (points_in_cur.col(i) * scale);
     const int point_id_cur = frame_cur->track_id_vec_(matches_cur_ref[i].first);
     const int point_id_ref = frame_ref->track_id_vec_(matches_cur_ref[i].second);
-    CHECK_EQ(point_id_cur, point_id_ref);
+    // CHECK_EQ(point_id_cur, point_id_ref);
     PointPtr new_point(new Point(point_id_cur, xyz_in_world));
     frame_cur->landmark_vec_.at(matches_cur_ref[i].first) = new_point;
     frame_ref->landmark_vec_.at(matches_cur_ref[i].second) = new_point;
@@ -843,23 +843,23 @@ void displayFeatureTracks(
     const FramePtr& frame_cur,
     const FramePtr& frame_ref)
 {
-  cv::Mat img_rgb(frame_cur->img().size(), CV_8UC3);
-  cv::cvtColor(frame_cur->img(), img_rgb, cv::COLOR_GRAY2RGB);
+  // cv::Mat img_rgb(frame_cur->img().size(), CV_8UC3);
+  // cv::cvtColor(frame_cur->img(), img_rgb, cv::COLOR_GRAY2RGB);
 
-  /* TODO(cfo)
-  for(size_t i=0; i<frame_cur->fts_.size(); ++i)
-  {
-    const FeaturePtr& ftr_cur = frame_cur->fts_.at(i);
-    const FeaturePtr& ftr_ref = frame_ref->fts_.at(i);
-    cv::line(img_rgb,
-             cv::Point2f(ftr_cur->px[0], ftr_cur->px[1]),
-             cv::Point2f(ftr_ref->px[0], ftr_ref->px[1]),
-             cv::Scalar(0,0,255), 2);
+  // /* TODO(cfo)
+  // for(size_t i=0; i<frame_cur->fts_.size(); ++i)
+  // {
+  //   const FeaturePtr& ftr_cur = frame_cur->fts_.at(i);
+  //   const FeaturePtr& ftr_ref = frame_ref->fts_.at(i);
+  //   cv::line(img_rgb,
+  //            cv::Point2f(ftr_cur->px[0], ftr_cur->px[1]),
+  //            cv::Point2f(ftr_ref->px[0], ftr_ref->px[1]),
+  //            cv::Scalar(0,0,255), 2);
 
-  }
-  */
-  cv::imshow(frame_cur->cam_->getLabel().c_str(), img_rgb);
-  cv::waitKey(0);
+  // }
+  // */
+  // cv::imshow(frame_cur->cam_->getLabel().c_str(), img_rgb);
+  // cv::waitKey(0);
 }
 
 AbstractInitialization::UniquePtr makeInitializer(
@@ -905,8 +905,8 @@ void copyBearingVectors(
     AbstractInitialization::BearingVectors* f_cur,
     AbstractInitialization::BearingVectors* f_ref)
 {
-  CHECK_NOTNULL(f_cur);
-  CHECK_NOTNULL(f_ref);
+  // CHECK_NOTNULL(f_cur);
+  // CHECK_NOTNULL(f_ref);
   f_cur->reserve(matches_cur_ref.size());
   f_ref->reserve(matches_cur_ref.size());
   for(size_t i = 0; i < matches_cur_ref.size(); ++i)

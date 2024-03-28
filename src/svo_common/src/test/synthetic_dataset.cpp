@@ -1,6 +1,6 @@
 #include <svo/common/test/synthetic_dataset.h>
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 #include <svo/common/camera.h>
 #include <svo/common/frame.h>
@@ -36,7 +36,7 @@ bool SyntheticDataset::getNextFrame(
   std::string img_name;
   img_fs_ >> img_id >> stamp_seconds >> img_name;
   img_fs_.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-  CHECK(img_id >= first_frame_id_) << "image list is misordered.";
+  // CHECK(img_id >= first_frame_id_) << "image list is misordered.";
   uint64_t stamp = stamp_seconds*1e9;
   std::string img_filename(dataset_dir_ + "/data/" + img_name);
   cv::Mat img(cv::imread(img_filename, 0));

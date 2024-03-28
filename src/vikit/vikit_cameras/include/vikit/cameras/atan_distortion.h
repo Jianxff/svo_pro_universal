@@ -3,7 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <Eigen/Core>
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace vk {
 namespace cameras {
@@ -30,7 +30,7 @@ public:
   AtanDistortion(
       const Eigen::VectorXd& parameters)
   {
-    CHECK(parameters.size() == 1);
+    // CHECK(parameters.size() == 1);
     initializeParameters(parameters(0));
   }
 
@@ -50,9 +50,9 @@ public:
     return factor * vector;
   }
 
-  inline Eigen::Matrix2d jacobian(const Eigen::Vector2d& /*vector*/) const {
-    LOG(FATAL) << "Not implemented yet!";
-  }
+  // inline Eigen::Matrix2d jacobian(const Eigen::Vector2d& /*vector*/) const {
+  //   LOG(FATAL) << "Not implemented yet!";
+  // }
 
   inline void undistort(double& x, double& y) const
   {

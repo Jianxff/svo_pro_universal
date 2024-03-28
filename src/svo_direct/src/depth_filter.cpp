@@ -281,14 +281,14 @@ void initializeSeeds(
   const int max_n_features = max_n_seeds - frame->numFeatures();
   if(max_n_features <= 0)
   {
-    VLOG(3) << "Skip seed initialization. Have already enough features.";
+    // VLOG(3) << "Skip seed initialization. Have already enough features.";
     return;
   }
   if (no_features_in_frame)
   {
     ///TODO remove
     frame->clearFeatureStorage();
-    CHECK_EQ(frame->px_vec_.size(), 0);
+    // CHECK_EQ(frame->px_vec_.size(), 0);
 
     feature_detector->detect(
           frame->img_pyr_, frame->getMask(), max_n_features, frame->px_vec_,
@@ -326,7 +326,7 @@ void initializeSeeds(
   const size_t n_old = frame->num_features_;
   const size_t n_new = new_px.cols();
 
-  CHECK_GE(frame->px_vec_.cols(), static_cast<int>(n_new+n_old));
+  // CHECK_GE(frame->px_vec_.cols(), static_cast<int>(n_new+n_old));
   frame->px_vec_.middleCols(n_old, n_new) = new_px;
   frame->f_vec_.middleCols(n_old, n_new) = new_f;
   frame->grad_vec_.middleCols(n_old, n_new) = new_grads;
@@ -572,8 +572,8 @@ bool updateFilterGaussian(
   mu = (sigma2 * z + tau2 * mu) / denom;
   sigma2 = sigma2 * tau2 / denom;
 
-  CHECK_GE(sigma2, 0.0);
-  CHECK_GE(mu, 0.0);
+  // CHECK_GE(sigma2, 0.0);
+  // CHECK_GE(mu, 0.0);
   return true;
 }
 

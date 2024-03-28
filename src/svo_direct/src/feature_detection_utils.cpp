@@ -14,7 +14,7 @@
 #include <fast/fast.h>
 #include <vikit/vision.h>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 #include <svo/common/frame.h>
 #include <svo/common/camera.h>
 #include <svo/common/logging.h>
@@ -81,9 +81,9 @@ void fillFeatures(const Corners& corners,
     FeatureTypes& types,
     OccupandyGrid2D& grid)
 {
-  CHECK_EQ(keypoints.cols(), levels.size());
-  CHECK_EQ(keypoints.cols(), gradients.cols());
-  CHECK_EQ(static_cast<size_t>(keypoints.cols()), types.size());
+  // CHECK_EQ(keypoints.cols(), levels.size());
+  // CHECK_EQ(keypoints.cols(), gradients.cols());
+  // CHECK_EQ(static_cast<size_t>(keypoints.cols()), types.size());
 
   // copy new features in temporary vectors
   aslam::Aligned<std::vector, Keypoint>::type keypoint_vec;
@@ -151,8 +151,8 @@ void fastDetector(
     Corners& corners,
     OccupandyGrid2D& grid)
 {
-  CHECK_EQ(corners.size(), grid.occupancy_.size());
-  CHECK_LE(max_level, img_pyr.size()-1);
+  // CHECK_EQ(corners.size(), grid.occupancy_.size());
+  // CHECK_LE(max_level, img_pyr.size()-1);
 
   for(size_t level=min_level; level<=max_level; ++level)
   {
@@ -168,8 +168,8 @@ void fastDetector(
           img_pyr[level].rows, img_pyr[level].step, threshold, fast_corners);
 #else
     fast::fast_corner_detect_10(
-          (fast::fast_byte*) img_pyr[L].data, img_pyr[L].cols,
-          img_pyr[L].rows, img_pyr[L].step, threshold, fast_corners);
+          (fast::fast_byte*) img_pyr[level].data, img_pyr[level].cols,
+          img_pyr[level].rows, img_pyr[level].step, threshold, fast_corners);
 #endif
     std::vector<int> scores, nm_corners;
     fast::fast_corner_score_10((fast::fast_byte*) img_pyr[level].data, img_pyr[level].step,
@@ -204,8 +204,8 @@ void shiTomasiDetector(
     OccupandyGrid2D& grid,
     OccupandyGrid2D& closeness_check_grid)
 {
-  CHECK_EQ(corners.size(), grid.occupancy_.size());
-  CHECK_LE(max_level, img_pyr.size()-1);
+  // CHECK_EQ(corners.size(), grid.occupancy_.size());
+  // CHECK_LE(max_level, img_pyr.size()-1);
 
   for(size_t level=min_level; level<=max_level; ++level)
   {
@@ -271,7 +271,7 @@ void edgeletDetector_V1(
     Corners& corners,
     OccupandyGrid2D& grid)
 {
-  CHECK_EQ(corners.size(), grid.occupancy_.size());
+  // CHECK_EQ(corners.size(), grid.occupancy_.size());
 
   for(int level=min_level+1; level<=max_level; ++level) // note, we start one level higher, so we already have some smoothing
   {
@@ -319,7 +319,7 @@ void edgeletDetector_V2(
     Corners& corners,
     OccupandyGrid2D& grid)
 {
-  CHECK_EQ(corners.size(), grid.occupancy_.size());
+  // CHECK_EQ(corners.size(), grid.occupancy_.size());
 
   constexpr int level = 1;
   constexpr int scale = (1<<level);
@@ -392,7 +392,7 @@ bool getCornerAngle(
     const size_t level,
     double* angle)
 {
-  CHECK_NOTNULL(angle);
+  // CHECK_NOTNULL(angle);
   constexpr int kHalfPatchSize = 2;
   constexpr int kPatchSize = 2*kHalfPatchSize;
   constexpr int kHalfPatchSizePlusBorder = kHalfPatchSize + 1;
@@ -404,8 +404,8 @@ bool getCornerAngle(
      || px(0) >= img.cols - kHalfPatchSizePlusBorder
      || px(1) >= img.rows - kHalfPatchSizePlusBorder)
   {
-    VLOG(100) << "Can't determine corner angle. Patch too close to border. "
-              << "px = " << px.transpose() << ", level = " << level;
+    // VLOG(100) << "Can't determine corner angle. Patch too close to border. "
+              // << "px = " << px.transpose() << ", level = " << level;
     return false;
   }
 
@@ -430,8 +430,8 @@ bool getShiTomasiScore(
     const Eigen::Vector2i& px,
     double* score)
 {
-  CHECK_NOTNULL(score);
-  CHECK(img.type() == CV_8UC1);
+  // CHECK_NOTNULL(score);
+  // CHECK(img.type() == CV_8UC1);
   constexpr int kHalfPatchSize = 4;
   constexpr int kPatchSize = 2 * kHalfPatchSize;
   constexpr int kPatchArea = kPatchSize * kPatchSize;
@@ -605,34 +605,34 @@ void displayGrid(
     const int img_width,
     const int img_height)
 {
-  // copy detected features in feature_occupancy grid
-  OccupandyGrid2D new_grid(old_grid.cell_size, old_grid.n_cols, old_grid.n_rows);
+  // // copy detected features in feature_occupancy grid
+  // OccupandyGrid2D new_grid(old_grid.cell_size, old_grid.n_cols, old_grid.n_rows);
 
-  for(int i=0; i<keypoints.cols(); ++i)
-  {
-    new_grid.occupancy_.at(
-          new_grid.getCellIndex(keypoints(0,i), keypoints(1,i))) = true;
-  }
+  // for(int i=0; i<keypoints.cols(); ++i)
+  // {
+  //   new_grid.occupancy_.at(
+  //         new_grid.getCellIndex(keypoints(0,i), keypoints(1,i))) = true;
+  // }
 
-  // create image of grid with previously occupied cells in gray, new detected
-  // features in white and cells without features in black.
-  cv::Mat img(img_height, img_width, CV_8UC1);
-  for(int y=0; y<img_height; ++y)
-  {
-    uchar* img_ptr = img.ptr<uchar>(y);
-    for(int x=0; x<img_width; ++x)
-    {
-      if(old_grid.occupancy_.at(old_grid.getCellIndex(x,y)))
-        img_ptr[x] = 125;
-      else if(new_grid.occupancy_.at(new_grid.getCellIndex(x,y)))
-        img_ptr[x] = 255;
-      else
-        img_ptr[x] = 0;
-    }
-  }
+  // // create image of grid with previously occupied cells in gray, new detected
+  // // features in white and cells without features in black.
+  // cv::Mat img(img_height, img_width, CV_8UC1);
+  // for(int y=0; y<img_height; ++y)
+  // {
+  //   uchar* img_ptr = img.ptr<uchar>(y);
+  //   for(int x=0; x<img_width; ++x)
+  //   {
+  //     if(old_grid.occupancy_.at(old_grid.getCellIndex(x,y)))
+  //       img_ptr[x] = 125;
+  //     else if(new_grid.occupancy_.at(new_grid.getCellIndex(x,y)))
+  //       img_ptr[x] = 255;
+  //     else
+  //       img_ptr[x] = 0;
+  //   }
+  // }
 
-  cv::imshow("detector", img);
-  cv::waitKey(1);
+  // cv::imshow("detector", img);
+  // cv::waitKey(1);
 }
 
 
@@ -693,8 +693,8 @@ void detectCannyEdges(
   //cv::GaussianBlur(src_gray, dest, cv::Size(smoothing_kernel_size, smoothing_kernel_size), 0);
   nonlinearDiffusion(src_gray, dest, 0.25, 5);
 
-  cv::imshow("diffused image", dest);
-  cv::waitKey(10);
+  // cv::imshow("diffused image", dest);
+  // cv::waitKey(10);
 
   // Canny detector
   cv::Canny(dest, dest, low_threshold, low_threshold*ratio);
@@ -733,8 +733,8 @@ void drawFeatures(
     const bool only_matched_features,
     cv::Mat* img_rgb)
 {
-  CHECK_NOTNULL(img_rgb);
-  CHECK_GT(frame.img_pyr_.size(), level);
+  // CHECK_NOTNULL(img_rgb);
+  // CHECK_GT(frame.img_pyr_.size(), level);
 
   const int scale = (1<<level);
   const int size = (level == 1) ? 2 : 0;
@@ -934,7 +934,7 @@ void nonmax_3x3(const std::vector<Eigen::Vector2i>& corners, const std::vector<i
 
 void mergeGrids(const OccupandyGrid2D& grid1, OccupandyGrid2D* grid2)
 {
-  CHECK(grid1.occupancy_.size() == grid2->occupancy_.size());
+  // CHECK(grid1.occupancy_.size() == grid2->occupancy_.size());
   for(size_t i=0; i<grid1.occupancy_.size(); i++)
   {
     if(grid2->occupancy_.at(i))

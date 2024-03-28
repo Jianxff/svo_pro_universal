@@ -167,7 +167,7 @@ template<typename Scalar>
 typename QuatTransformationTemplate<Scalar>::Matrix3X
 QuatTransformationTemplate<Scalar>::transformVectorized(
     const typename QuatTransformationTemplate<Scalar>::Matrix3X& rhs) const {
-  CHECK_GT(rhs.cols(), 0);
+  // CHECK_GT(rhs.cols(), 0);
   return q_A_B_.rotateVectorized(rhs).colwise() + A_t_A_B_;
 }
 
@@ -298,8 +298,8 @@ template<typename Scalar>
 QuatTransformationTemplate<Scalar> interpolateComponentwise(
     const QuatTransformationTemplate<Scalar>& T_a,
     const QuatTransformationTemplate<Scalar>& T_b, const double lambda) {
-  CHECK_GE(lambda, 0.0);
-  CHECK_LE(lambda, 1.0);
+  // CHECK_GE(lambda, 0.0);
+  // CHECK_LE(lambda, 1.0);
   const PositionTemplate<Scalar> p_int =
       T_a.getPosition() + lambda * (T_b.getPosition() - T_a.getPosition());
   const Eigen::Quaternion<Scalar> q_int =

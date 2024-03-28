@@ -5,7 +5,7 @@
  *      by: cforster
  */
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 #include <vikit/homography.h>
 #include <vikit/math_utils.h>
 #include <vikit/homography_decomp.h> // copy of homography decomposition in opencv3
@@ -25,7 +25,7 @@ Homography estimateHomography(
 {
   // TODO: too long. split up and write tests
 
-  CHECK_EQ(f_cur.cols(), f_ref.cols());
+  // CHECK_EQ(f_cur.cols(), f_ref.cols());
   const size_t N = f_cur.cols();
   const double thresh = reproj_error_thresh/focal_length;
 
@@ -55,7 +55,7 @@ Homography estimateHomography(
     n_inliers += inliers[i];
   }
 
-  VLOG(100) << "Homography has " << n_inliers << " inliers";
+  // VLOG(100) << "Homography has " << n_inliers << " inliers";
   if(n_inliers < min_num_inliers)
   {
     return Homography(); // return homography with score zero.
@@ -67,7 +67,7 @@ Homography estimateHomography(
   std::vector<cv::Mat> translations;
   std::vector<cv::Mat> normals;
   cv::decomposeHomographyMat(H, K, rotations, translations, normals);
-  CHECK_EQ(rotations.size(), 4u);
+  // CHECK_EQ(rotations.size(), 4u);
 
   // copy in decompositions struct
   std::vector<Homography> decomp;

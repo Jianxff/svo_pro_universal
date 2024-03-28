@@ -40,7 +40,7 @@ std::atomic_uint64_t Point::global_map_value_version_ {0u};
 
 void Point::addObservation(const FramePtr& frame, const size_t feature_index)
 {
-  CHECK_NOTNULL(frame.get());
+  // CHECK_NOTNULL(frame.get());
 
   // check that we don't have yet a reference to this frame
   // TODO(cfo): maybe we should use a std::unordered_map to store the observations.
@@ -53,7 +53,7 @@ void Point::addObservation(const FramePtr& frame, const size_t feature_index)
   }
   else
   {
-    CHECK_EQ(it->keypoint_index_, feature_index);
+    // CHECK_EQ(it->keypoint_index_, feature_index);
   }
 }
 
@@ -67,7 +67,7 @@ void Point::removeObservation(int frame_id)
 
 void Point::initNormal()
 {
-  CHECK(!obs_.empty()) << "initializing normal without any observation";
+  // CHECK(!obs_.empty()) << "initializing normal without any observation";
 
   if(const FramePtr& frame = obs_.front().frame.lock())
   {
@@ -130,7 +130,7 @@ bool Point::getCloseViewObs(
 
 double Point::getTriangulationParallax() const
 {
-  CHECK(!obs_.empty()) << "getTriangualtionParallax(): obs_ is empty!";
+  // CHECK(!obs_.empty()) << "getTriangualtionParallax(): obs_ is empty!";
 
   const FramePtr ref_frame = obs_.front().frame.lock();
   if(!ref_frame)

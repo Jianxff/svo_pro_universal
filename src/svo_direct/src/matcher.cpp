@@ -134,7 +134,7 @@ Matcher::MatchResult Matcher::findMatchDirect(
     }
     else
     {
-      VLOG(300) << "NOT CONVERGED: search level " << search_level_;
+      // VLOG(300) << "NOT CONVERGED: search level " << search_level_;
     }
   }
   return MatchResult::kFailAlignment;

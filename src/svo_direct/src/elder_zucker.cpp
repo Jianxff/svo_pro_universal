@@ -2,12 +2,22 @@
 #ifdef __SSSE3__
 #include <tmmintrin.h>
 #endif
-#include <boost/math/special_functions/erf.hpp>
+// #include <boost/math/special_functions/erf.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 
 namespace svo {
 namespace elder_zucker {
+
+double erf_inv(double y) {
+  double x = 0.0;
+  double dx = 0.0;
+  do {
+    dx = (std::erf(x) - y) / (2.0 / std::sqrt(M_PI) * std::exp(-x*x));
+    x -= dx;
+  } while (std::abs(dx) > 1e-6);
+  return x;
+}
 
 void detectEdges(
     const std::vector<cv::Mat>& img_pyr,
@@ -97,7 +107,7 @@ void detectEdges(
     // compute critical threshold 2
     const float scale = L+1;
     const float s2 = sn / (4.0 * sqrt(pi/3.0)*scale*scale*scale);
-    const float c2 = sqrt(2.0) * s2 * (boost::math::erf_inv(1-alpha_p));
+    const float c2 = sqrt(2.0) * s2 * (erf_inv(1-alpha_p));
 
     // compute laplacian of gaussians
     const int n_rows = img_pyr_smoothed[L].rows;

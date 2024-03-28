@@ -10,7 +10,7 @@ FeatureRef::FeatureRef(
   , frame_index_(frame_index)
   , feature_index_(feature_index)
 {
-  CHECK_LT(frame_index_, frame_bundle_->size());
+  // CHECK_LT(frame_index_, frame_bundle_->size());
 }
 
 const Eigen::Block<Keypoints, 2, 1> FeatureRef::getPx() const

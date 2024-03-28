@@ -17,7 +17,7 @@
 #include <vikit/ringbuffer.h>
 
 #include <vikit/cameras/ncamera.h>
-#include <rpg_common/callback_host.h>
+// #include <rpg_common/callback_host.h>
 
 #include "svo/common/frame.h"
 #include "svo/map.h"
@@ -57,11 +57,11 @@ struct BaseOptions
 
   /// Keyframe selection for FORWARD: If we are tracking more than this amount
   /// of features, then we don't take a new keyframe.
-  size_t kfselect_numkfs_upper_thresh = 110;
+  int kfselect_numkfs_upper_thresh = 110;
 
   /// Keyframe selection for FORWARD : If we have less than this amount of
   /// features we always select a new keyframe.
-  size_t kfselect_numkfs_lower_thresh = 80;
+  int kfselect_numkfs_lower_thresh = 80;
 
   /// Keyframe selection for FORWARD : Minimum distance in meters (set initial
   /// scale!) before a new keyframe is selected.
@@ -239,7 +239,7 @@ kUpdateResultName;
 
 
 /// Base class for various VO pipelines. Manages the map and the state machine.
-class FrameHandlerBase : public rpg_common::CallbackHost<const FrameBundlePtr&>
+class FrameHandlerBase
 {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

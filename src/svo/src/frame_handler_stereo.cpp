@@ -138,7 +138,7 @@ UpdateResult FrameHandlerStereo::makeKeyframe()
   static size_t kf_counter = 0;
   const size_t kf_id = kf_counter++ % cams_->numCameras();
   const size_t other_id = kf_counter % cams_->numCameras();
-  CHECK(kf_id != other_id);
+  // CHECK(kf_id != other_id);
 
   // ---------------------------------------------------------------------------
   // add extra features when num tracked is critically low!

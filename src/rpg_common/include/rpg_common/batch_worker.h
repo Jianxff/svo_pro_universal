@@ -3,7 +3,7 @@
 #include <atomic>
 #include <thread>
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 #include "rpg_common/threadsafe_queue.h"
 #include "rpg_common/worker_base.h"
@@ -52,8 +52,8 @@ class BatchWorker : public WorkerBase
 
   virtual void pause() override
   {
-    CHECK(!paused_);
-    CHECK(thread_.joinable());
+    // CHECK(!paused_);
+    // CHECK(thread_.joinable());
     paused_ = true;
     thread_.join();
   }
@@ -65,8 +65,8 @@ class BatchWorker : public WorkerBase
 
   virtual void resume() override
   {
-    CHECK(paused_);
-    CHECK(!thread_.joinable());
+    // CHECK(paused_);
+    // CHECK(!thread_.joinable());
     paused_ = false;
     thread_ = std::thread(&BatchWorker<DataType>::workLoop, this);
   }

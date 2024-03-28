@@ -11,7 +11,7 @@
 #include <svo/common/point.h>
 #include <svo/common/feature_wrapper.h>
 #include <svo/common/camera.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
 
 namespace svo {
 namespace warp {
@@ -27,7 +27,7 @@ void getWarpMatrixAffine(
     const int level_ref,
     AffineTransformation2* A_cur_ref)
 {
-  CHECK_NOTNULL(A_cur_ref);
+  // CHECK_NOTNULL(A_cur_ref);
 
   // Compute affine warp matrix A_ref_cur
   const int kHalfPatchSize = 5;
@@ -204,9 +204,9 @@ bool warpPixelwise(
       const int yi = std::floor(ele_ref[1]);
       if (xi<0 || yi<0 || xi+1>=img_ref.cols || yi+1>=img_ref.rows)
       {
-        VLOG(200) << "ref image: col-" << img_ref.cols
-                  << ", row-" << img_ref.rows;
-        VLOG(200) << "xi: " << xi << ", " << "yi: " << yi;
+        // VLOG(200) << "ref image: col-" << img_ref.cols
+                  // << ", row-" << img_ref.rows;
+        // VLOG(200) << "xi: " << xi << ", " << "yi: " << yi;
         return false;
       }
       else
@@ -232,11 +232,11 @@ void createPatchNoWarp(
     const int halfpatch_size,
     uint8_t* patch)
 {
-  CHECK_NOTNULL(patch);
-  CHECK(px(0) >= halfpatch_size
-        && px(1) >= halfpatch_size
-        && px(0) < img.cols - halfpatch_size
-        && px(1) < img.rows - halfpatch_size);
+  // CHECK_NOTNULL(patch);
+  // CHECK(px(0) >= halfpatch_size
+        // && px(1) >= halfpatch_size
+        // && px(0) < img.cols - halfpatch_size
+        // && px(1) < img.rows - halfpatch_size);
 
   const int patch_size = 2 * halfpatch_size;
   uint8_t* patch_ptr = patch;
@@ -260,7 +260,7 @@ void createPatchNoWarpInterpolated(
     const int halfpatch_size,
     uint8_t* patch)
 {
-  CHECK_NOTNULL(patch);
+  // CHECK_NOTNULL(patch);
 
   // TODO(cfo): This could be easily implemented using SIMD instructions.
 
@@ -269,10 +269,10 @@ void createPatchNoWarpInterpolated(
   const float v = px(1);
   const int u_r = std::floor(u);
   const int v_r = std::floor(v);
-  CHECK(u_r >= halfpatch_size
-        && v_r >= halfpatch_size
-        && u_r < img.cols - halfpatch_size
-        && v_r < img.rows - halfpatch_size);
+  // CHECK(u_r >= halfpatch_size
+        // && v_r >= halfpatch_size
+        // && u_r < img.cols - halfpatch_size
+        // && v_r < img.rows - halfpatch_size);
 
   // compute interpolation weights
   const float subpix_x = u - u_r;
