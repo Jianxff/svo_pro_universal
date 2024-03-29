@@ -6,8 +6,7 @@
 #include <svo/svo.h>
 #include <svo/viewer/viewer.h>
 
-#include "dataset.hpp"
-
+#include "dataset/euroc.hpp"
 
 int main(int argc, char* argv[]) {
     if(argc != 4) {

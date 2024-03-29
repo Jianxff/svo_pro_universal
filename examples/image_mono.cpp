@@ -1,16 +1,14 @@
 #include <thread>
 #include <vector>
-#include <memory>
-#include <fstream>
 
 #include <svo/svo.h>
 #include <svo/viewer/viewer.h>
 
-#include "dataset/euroc.hpp"
+#include "dataset/images.hpp"
 
 int main(int argc, char* argv[]) {
-    if(argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " <camera_calib_file> <svo_config_file> <euroc_mav_directory>" << std::endl;
+    if(argc != 5) {
+        std::cerr << "Usage: " << argv[0] << " <camera_calib_file> <svo_config_file> <images_directory> <fps>" << std::endl;
         return 1;
     }
 
@@ -21,7 +19,8 @@ int main(int argc, char* argv[]) {
 
     const std::string camera_calib_file = argv[1];
     const std::string svo_config_file = argv[2];
-    const std::string euroc_mav_dir = argv[3];
+    const std::string image_dir = argv[3];
+    const uint32_t fps = std::stoul(argv[4]);
 
     const auto vo = svo::Odometry(
         svo::Odometry::Type::kMono,
@@ -30,7 +29,7 @@ int main(int argc, char* argv[]) {
     );
 
     // load frames
-    const dataset::Euroc euroc_ = dataset::Euroc::create(euroc_mav_dir);
+    const dataset::Images seq_ = dataset::Images::create(image_dir, fps);
 
     auto svo_viewer_ = std::make_shared<svo::viewer::Viewer>(vo.frame_handler());
     std::thread viz_thread(&svo::viewer::Viewer::run, svo_viewer_);
@@ -38,17 +37,17 @@ int main(int argc, char* argv[]) {
     // loop
     vo.start();
     for(;;) {
-        const auto data = euroc_.nextFrame();
+        const auto data = seq_.nextFrame();
         if(!data.valid()) {
             break;
         }
-        vo.addImageBundle({data.cam0}, data.ts);
+        vo.addImageBundle({data.cam}, data.ts);
 
         if(vo.stage() == svo::Stage::kPaused) {
             cv::waitKey(0);
             vo.start();
         }
-        // std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
     cv::waitKey(0);
