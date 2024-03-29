@@ -19,15 +19,20 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
 
 ## emscripten settings
 set(COMPILE_FLAG_TEXT "-O3 -fexceptions -mbulk-memory -s USE_PTHREADS=1")
-set(LINK_FLAG_TEXT "-s USE_ZLIB=1 -s DYNAMIC_EXECUTION=0 \
-  -s INITIAL_MEMORY=256MB \
-  -s NO_DISABLE_EXCEPTION_CATCHING=1 \
-  -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
-  -s MODULARIZE=1 \
-  -s EXPORT_NAME=createModule \
-  -s SINGLE_FILE=1 \
-  -s ENVIRONMENT=web,worker,shell -s USE_PTHREADS=1 -s SHARED_MEMORY=1 -mbulk-memory \
-  -O3 -fexceptions --no-entry --no-check-features --bind"
+set(LINK_FLAG_TEXT " \
+    -s USE_ZLIB=1 \
+    -s DYNAMIC_EXECUTION=0 \
+    -s INITIAL_MEMORY=256MB \
+    -s NO_DISABLE_EXCEPTION_CATCHING=1 \
+    -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
+    -s MODULARIZE=1 \
+    -s EXPORT_NAME=WorldTracking \
+    -s SINGLE_FILE=1 \
+    -s ENVIRONMENT=web,worker,shell \
+    -s USE_PTHREADS=1 \
+    -s SHARED_MEMORY=1 \
+    -mbulk-memory -fexceptions \
+    -O3 --no-entry --no-check-features --bind"
 )
 
 # -s ALLOW_MEMORY_GROWTH=1 \
@@ -35,10 +40,10 @@ set(LINK_FLAG_TEXT "-s USE_ZLIB=1 -s DYNAMIC_EXECUTION=0 \
 
 ## emscripten debug
 # debug on
-set(LINK_FLAG_TEXT "${LINK_FLAG_TEXT} -s ASSERTIONS=1")
+# set(LINK_FLAG_TEXT "${LINK_FLAG_TEXT} -s ASSERTIONS=1")
 # debug off
-# set(COMPILE_FLAG_TEXT "${COMPILE_FLAG_TEXT} -g0")
-# set(LINK_FLAG_TEXT "${LINK_FLAG_TEXT} -g0 -s ASSERTIONS=0")
+set(COMPILE_FLAG_TEXT "${COMPILE_FLAG_TEXT} -g0")
+set(LINK_FLAG_TEXT "${LINK_FLAG_TEXT} -g0 -s ASSERTIONS=0")
 
 ## ccache
 find_program(CCACHE_EXE ccache)
@@ -88,3 +93,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "${COMPILE_FLAG_T
 
 ## source
 add_subdirectory(src)
+
+# add export
+add_custom_command(TARGET ${PROJECT_NAME}
+  POST_BUILD
+  COMMAND echo "export default WorldTracking;" >> ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.js
+  VERBATIM
+)
