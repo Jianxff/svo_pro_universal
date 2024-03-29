@@ -546,8 +546,6 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
     SVO_STOP_TIMER("frontend_time");
     g_permon->writeToFile();
   }
-  // Call callbacks.
-  VLOG(40) << "Triggering addFrameBundle() callbacks...";
   return true;
 }
 
