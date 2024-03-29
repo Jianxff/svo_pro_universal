@@ -17,7 +17,6 @@
 #include <vikit/ringbuffer.h>
 
 #include <vikit/cameras/ncamera.h>
-#include <rpg_common/callback_host.h>
 
 #include "svo/common/frame.h"
 #include "svo/map.h"
@@ -239,7 +238,7 @@ kUpdateResultName;
 
 
 /// Base class for various VO pipelines. Manages the map and the state machine.
-class FrameHandlerBase : public rpg_common::CallbackHost<const FrameBundlePtr&>
+class FrameHandlerBase
 {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

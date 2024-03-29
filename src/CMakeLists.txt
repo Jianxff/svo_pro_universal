@@ -18,7 +18,6 @@ target_link_libraries(${PROJECT_NAME}
 
 ## subdirectories
 # svo core
-add_subdirectory(rpg_common)
 add_subdirectory(svo)
 add_subdirectory(svo_common)
 add_subdirectory(svo_direct)

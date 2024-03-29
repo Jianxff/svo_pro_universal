@@ -548,7 +548,6 @@ bool FrameHandlerBase::addFrameBundle(const FrameBundlePtr& frame_bundle)
   }
   // Call callbacks.
   VLOG(40) << "Triggering addFrameBundle() callbacks...";
-  triggerCallbacks(last_frames_);
   return true;
 }
 
