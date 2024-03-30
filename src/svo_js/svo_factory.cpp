@@ -1,4 +1,7 @@
+#include <map>
+
 #include "svo_factory.h"
+
 
 using namespace svo;
 
@@ -48,6 +51,13 @@ T read_val(const emscripten::val value, const T default_val = T()) {
     return value.as<T>();
 }
 
+std::map<svo::Stage, int> stage2int = {
+    {svo::Stage::kTracking, 0},
+    {svo::Stage::kInitializing, 1},
+    {svo::Stage::kPaused, 2},
+    {svo::Stage::kRelocalization, 3}
+};
+
 void setInitialPose(FrameHandlerBase& vo) {
     Transformation T_world_imuinit(
         Eigen::Quaternion(1.0,0.0,0.0,0.0),
@@ -71,7 +81,7 @@ std::shared_ptr<CameraBundle> makeCamera(
     } else {
         intrinsics = convert_emarray_vector<double>(calib["intrinsics"], 4);
     }
-    
+    // SVO_INFO_STREAM("Using default intrinsics: " << intrinsics.transpose());
     CameraPtr camera = vk::cameras::factory::makePinholeCamera(
         intrinsics, imwidth, imheight
     );
@@ -348,12 +358,29 @@ FeatureTrackerOptions loadFeatureTrackerOptions(const emscripten::val node) {
     return o;
 }
 
+FrameRGBA::FrameRGBA(int width, int height) {
+    mat_ = cv::Mat(height, width, CV_8UC4);
+}
+
+const cv::Mat& FrameRGBA::mat() const {
+    return mat_;
+}
+
+const emscripten::val FrameRGBA::matData() const{
+    return emscripten::val(emscripten::memory_view<unsigned char>((mat_.total()*mat_.elemSize())/sizeof(unsigned char),
+                            (unsigned char*)mat_.data));
+}
+
 Odometry::Odometry(
     const emscripten::val calib,
     const emscripten::val config  
 ) {
     imwidth_ = read_val<uint32_t>(calib["width"]);
     imheight_ = read_val<uint32_t>(calib["height"]);
+    auto_reset_ = read_val<bool>(config["auto_reset"], false);
+
+    // SVO_INFO_STREAM("Initializing SVO with " << imwidth_ << "x" << imheight_ << " resolution.");
+
     const bool use_imu = read_val<bool>(calib["use_imu"], false);
 
     auto camera = makeCamera(calib);
@@ -362,7 +389,6 @@ Odometry::Odometry(
         imu_handler_ = makeIMU(calib, config);
         frame_handler_->imu_handler_ = imu_handler_;
     }
-    //
 }
 
 
@@ -393,8 +419,13 @@ void Odometry::start() const {
     frame_handler_->start();
 }
 
-const Stage Odometry::stage() const {
-    return frame_handler_->stage();
+void Odometry::reset() const {
+    frame_handler_->resetAll();
+    start();
+}
+
+const int Odometry::stage() const {
+    return stage2int[frame_handler_->stage()];
 }
 
 const uint32_t Odometry::imwidth() const {
@@ -435,28 +466,22 @@ bool Odometry::_set_imu_prior(const uint64_t timestamp) const{
     return true;
 }
 
-cv::Mat Odometry::_emscripten_arraybuffer_to_cvmat(int data) const{
-    cv::Mat image_rgba(
-        imwidth_, imheight_, CV_8UC4, 
-        reinterpret_cast<void*>(data)
-    );
-    cv::Mat image_bgr;
-    // convert
-    cv::cvtColor(image_rgba, image_bgr, cv::COLOR_RGBA2BGR);
-    return image_bgr;
-}
-
 void Odometry::addImageBundle(
     const emscripten::val timestamp,
-    const int arraybuffer
+    const FrameRGBA& frame
 ) const {
-    const uint64_t timestamp_u64 = timestamp.as<uint64_t>();
+    const uint64_t timestamp_u64 = static_cast<uint64_t>(timestamp.as<double>());
     if(!_set_imu_prior(timestamp_u64)){
         // VLOG(3) << "Could not align gravity! Attempting again in next iteration.";
         return;
     }
-    cv::Mat img = _emscripten_arraybuffer_to_cvmat(arraybuffer);
-    frame_handler_->addImageBundle({img}, timestamp_u64);
+    cv::Mat rgb;
+    cv::cvtColor(frame.mat().clone(), rgb, cv::COLOR_RGBA2BGR);
+    frame_handler_->addImageBundle({rgb}, timestamp_u64);
+    // check stage
+    if(auto_reset_ && stage() == stage2int[Stage::kPaused]) {
+        reset();
+    }
 }
 
 void Odometry::addImuMeasurement(
@@ -465,7 +490,10 @@ void Odometry::addImuMeasurement(
     const emscripten::val acc_array
 ) const {
     if(imu_handler_ == nullptr) return;
-    const uint64_t timestamp_u64 = timestamp.as<uint64_t>();
+    if(gyro_array[0] == emscripten::val::null() || acc_array[0] == emscripten::val::null()) 
+        return;
+    ///
+    const uint64_t timestamp_u64 = static_cast<uint64_t>(timestamp.as<double>());
     Eigen::Vector3d gyro, acc;
     gyro << gyro_array[0].as<double>(), gyro_array[1].as<double>(), gyro_array[2].as<double>();
     acc << acc_array[0].as<double>(), acc_array[1].as<double>(), acc_array[2].as<double>();
@@ -478,14 +506,20 @@ void Odometry::addImuMeasurement(
 }
 
 
+
 EMSCRIPTEN_BINDINGS(svojs)
 {
-    emscripten::constant("S_INIT", Stage::kInitializing);
-    emscripten::constant("S_PASUED", Stage::kPaused);
-    emscripten::constant("S_TRACK", Stage::kTracking);
-    emscripten::constant("S_RELOC", Stage::kRelocalization);
+    emscripten::constant("S_ERROR", -1);
+    emscripten::constant("S_TRACK", 0);
+    emscripten::constant("S_INIT", 1);
+    emscripten::constant("S_PASUED", 2);
+    emscripten::constant("S_RELOC", 3);
 
-    emscripten::class_<Odometry>("Odometry")
+    emscripten::class_<FrameRGBA>("Frame")
+        .constructor<int, int>()
+        .property("data", &FrameRGBA::matData);
+
+    emscripten::class_<Odometry>("Instance")
         .constructor<emscripten::val, emscripten::val>()
         
         .property("state", &Odometry::stage)
@@ -493,7 +527,8 @@ EMSCRIPTEN_BINDINGS(svojs)
         .property("height", &Odometry::imheight)
 
         .function("start", &Odometry::start)
-        .function("addImage", &Odometry::addImageBundle, emscripten::allow_raw_pointers())
+        .function("reset", &Odometry::reset)
+        .function("addFrame", &Odometry::addImageBundle, emscripten::allow_raw_pointers())
         .function("addMotion", &Odometry::addImuMeasurement, emscripten::allow_raw_pointers())
         .function("getGLPose", &Odometry::world_pose_gl)
         .function("getViewPose", &Odometry::world_viewpose_gl);

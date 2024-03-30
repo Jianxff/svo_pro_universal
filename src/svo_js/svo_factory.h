@@ -71,6 +71,17 @@ std::shared_ptr<svo::CameraBundle> makeCamera(
 );
 
 
+class FrameRGBA{
+public:
+    FrameRGBA(int imwidth, int imheight);
+
+    const cv::Mat& mat() const;
+    const emscripten::val matData() const;
+protected:
+    cv::Mat mat_;
+};
+
+
 /// Full system
 class Odometry {
 public:
@@ -80,8 +91,9 @@ public:
     );
 
     void start() const;
+    void reset() const;
 
-    const svo::Stage stage() const;
+    const int stage() const;
     const uint32_t imwidth() const;
     const uint32_t imheight() const;
 
@@ -91,7 +103,7 @@ public:
 
     void addImageBundle(
         const emscripten::val timestamp,
-        int arraybuffer
+        const FrameRGBA& frame
     ) const;
 
     void addImuMeasurement(
@@ -102,7 +114,6 @@ public:
 
 private:
     bool _set_imu_prior(const uint64_t timestamp) const;
-    cv::Mat _emscripten_arraybuffer_to_cvmat(int data) const;
 
     uint32_t imwidth_;
     uint32_t imheight_;
@@ -111,6 +122,7 @@ private:
     svo::FrameHandlerMono::Ptr frame_handler_;
 
     bool set_initial_attitude_from_gravity_ = true;
+    bool auto_reset_ = false;
 };
 
 

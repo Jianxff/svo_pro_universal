@@ -149,9 +149,9 @@ size_t FeatureTracker::initializeNewTracks(const FrameBundlePtr& nframe)
     // Compute and normalize all bearing vectors.
     std::vector<bool> success;
     frame->cam()->backProject3(new_px, &new_f, &success);
-    for (const bool s : success) {
-      // CHECK(s);
-    }
+    // for (const bool s : success) {
+    //   // CHECK(s);
+    // }
 
     new_f = new_f.array().rowwise() / new_f.colwise().norm().array();
 

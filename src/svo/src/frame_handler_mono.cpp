@@ -195,7 +195,7 @@ UpdateResult FrameHandlerMono::processFrame()
     reprojector_utils::reprojectMapPoints(
           newFrame(), overlap_kfs_.at(0),
           reprojectors_.at(0)->options_, &map_point_grid);
-    DepthFilter::ulock_t lock(depth_filter_->feature_detector_mut_);
+    // DepthFilter::ulock_t lock(depth_filter_->feature_detector_mut_);
     feature_detection_utils::mergeGrids(
           map_point_grid, &depth_filter_->sec_feature_detector_->grid_);
   }
@@ -208,7 +208,7 @@ UpdateResult FrameHandlerMono::processFrame()
   //       depth-filter
   //
   {
-    DepthFilter::ulock_t lock(depth_filter_->feature_detector_mut_);
+    // DepthFilter::ulock_t lock(depth_filter_->feature_detector_mut_);
     setDetectorOccupiedCells(0, depth_filter_->feature_detector_);
 
   } // release lock
@@ -280,15 +280,15 @@ UpdateResult FrameHandlerMono::relocalizeFrame(
 
 void FrameHandlerMono::resetAll()
 {
-  if(bundle_adjustment_type_==BundleAdjustmentType::kCeres)
-  {
-    // with the ceres backend we have to make sure to initialize the scale
-    backend_scale_initialized_ = false;
-  }
-  else
-  {
-    backend_scale_initialized_ = true;
-  }
+  // if(bundle_adjustment_type_==BundleAdjustmentType::kCeres)
+  // {
+  //   // with the ceres backend we have to make sure to initialize the scale
+  //   backend_scale_initialized_ = false;
+  // }
+  // else
+  // {
+  //   backend_scale_initialized_ = true;
+  // }
   resetVisionFrontendCommon();
 }
 

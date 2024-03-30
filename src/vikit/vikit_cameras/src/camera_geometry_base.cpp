@@ -51,6 +51,8 @@ void CameraGeometryBase::backProject3(
   const int num_keypoints = keypoints.cols();
   // CHECK_NOTNULL(out_bearing_vectors)->resize(Eigen::NoChange, num_keypoints);
   // CHECK_NOTNULL(success)->resize(num_keypoints);
+  out_bearing_vectors->resize(Eigen::NoChange, num_keypoints);
+  success->resize(num_keypoints);
 
   for (int i = 0; i < num_keypoints; ++i) {
     Eigen::Vector3d bearing_vector;

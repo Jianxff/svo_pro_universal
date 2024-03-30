@@ -11,7 +11,7 @@
 #include <queue>
 #include <memory> // std::shared_ptr
 #include <mutex>
-#include <thread>
+// #include <thread>
 #include <condition_variable>
 #include <vikit/performance_monitor.h>
 #include <svo/direct/matcher.h>
@@ -113,8 +113,8 @@ public:
 
   typedef std::shared_ptr<DepthFilter> Ptr;
   typedef std::mutex mutex_t;
-  typedef std::unique_lock<mutex_t> ulock_t;
-  typedef std::queue<Job> JobQueue;
+  // typedef std::unique_lock<mutex_t> ulock_t;
+  // typedef std::queue<Job> JobQueue;
 
   DepthFilterOptions options_;
 
@@ -132,10 +132,10 @@ public:
   virtual ~DepthFilter();
 
   /// Start this thread when seed updating should be in a parallel thread.
-  void startThread();
+  // void startThread();
 
   /// Stop the parallel thread that is running.
-  void stopThread();
+  // void stopThread();
 
   /// Add new keyframe to the queue, depth_max is only required for direct-depth
   void addKeyframe(
@@ -160,20 +160,20 @@ public:
       const FramePtr& new_frame);
 
   // need public access to set grid occupancy
-  mutex_t feature_detector_mut_;
+  // mutex_t feature_detector_mut_;
   DetectorPtr feature_detector_;
   DetectorPtr sec_feature_detector_; // for extra points used for loop closing
 
 protected:
-  mutex_t jobs_mut_;
-  JobQueue jobs_;
-  std::condition_variable jobs_condvar_;
-  std::unique_ptr<std::thread> thread_;
-  bool quit_thread_ = false;
+  // mutex_t jobs_mut_;
+  // JobQueue jobs_;
+  // std::condition_variable jobs_condvar_;
+  // std::unique_ptr<std::thread> thread_;
+  // bool quit_thread_ = false;
   Matcher::Ptr matcher_;
 
   /// A thread that is continuously updating the seeds.
-  void updateSeedsLoop();
+  // void updateSeedsLoop();
 };
 
 namespace depth_filter_utils {

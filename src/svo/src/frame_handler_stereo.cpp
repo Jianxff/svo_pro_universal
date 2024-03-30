@@ -162,7 +162,7 @@ UpdateResult FrameHandlerStereo::makeKeyframe()
   // init new depth-filters, set feature-detection grid-cells occupied that
   // already have a feature
   {
-    DepthFilter::ulock_t lock(depth_filter_->feature_detector_mut_);
+    // DepthFilter::ulock_t lock(depth_filter_->feature_detector_mut_);
     setDetectorOccupiedCells(kf_id, depth_filter_->feature_detector_);
   } // release lock
   depth_filter_->addKeyframe(

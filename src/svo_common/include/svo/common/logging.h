@@ -22,9 +22,9 @@
 #   define SVO_DEBUG_STREAM(x) {std::stringstream ss; ss << x; LOGD("%s", ss.str().c_str()); }
 #   define SVO_ERROR_STREAM(x) {std::stringstream ss; ss << x; LOGE("%s", ss.str().c_str()); }
 # else
-#   define SVO_INFO_STREAM(x) {std::cout<<"[INFO] SVO: "<<x<<std::endl; }
-#   define SVO_DEBUG_STREAM(x) {std::cout<<"[DEBUG] SVO: "<<x<<std::endl; }
-#   define SVO_WARN_STREAM(x) {std::cout<<"[WARN] SVO: "<<x<<std::endl; }
+#   define SVO_INFO_STREAM(x) { /*std::cout<<"[INFO] SVO: "<<x<<std::endl;*/ }
+#   define SVO_DEBUG_STREAM(x) { /*std::cout<<"[DEBUG] SVO: "<<x<<std::endl;*/ }
+#   define SVO_WARN_STREAM(x) { /*std::cout<<"[WARN] SVO: "<<x<<std::endl;*/ }
 #   define SVO_ERROR_STREAM(x) {std::cout<<"[ERROR] SVO: "<<x<<std::endl; }
 #endif
 # include <chrono> // Adapted from rosconsole. Copyright (c) 2008, Willow Garage, Inc.

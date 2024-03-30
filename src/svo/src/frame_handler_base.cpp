@@ -967,7 +967,7 @@ void FrameHandlerBase::resetBackend()
     }
 #endif
     bundle_adjustment_->reset();
-    LOG(WARNING) <<"Resetting backend, the pointer will be reset.";
+    // LOG(WARNING) <<"Resetting backend, the pointer will be reset.";
     bundle_adjustment_.reset();
     bundle_adjustment_type_ = BundleAdjustmentType::kNone;
   }

@@ -84,6 +84,9 @@ public:
 
   inline CameraPtr cam() const { return cams_->getCameraShared(0); }
 
+  /// Reset the frame handler. Implement in derived class.
+  virtual void resetAll() override;
+
 protected:
 
   // helpers
@@ -109,8 +112,7 @@ protected:
       const Transformation& T_cur_ref,
       const FramePtr& ref_keyframe);
 
-  /// Reset the frame handler. Implement in derived class.
-  virtual void resetAll() override;
+
 };
 
 } // namespace svo

@@ -52,39 +52,39 @@ DepthFilter::DepthFilter(
   matcher_->options_.scan_on_unit_sphere = options.scan_epi_unit_sphere;
   matcher_->options_.affine_est_offset_ = options.affine_est_offset;
   matcher_->options_.affine_est_gain_ = options.affine_est_gain;
-  if(options_.use_threaded_depthfilter)
-    startThread();
+  // if(options_.use_threaded_depthfilter)
+  //   startThread();
 }
 
 DepthFilter::~DepthFilter()
 {
-  stopThread();
+  // stopThread();
   SVO_INFO_STREAM("DepthFilter: destructed.");
 }
 
-void DepthFilter::startThread()
-{
-  if(thread_)
-  {
-    SVO_ERROR_STREAM("DepthFilter: Thread already started!");
-    return;
-  }
-  SVO_INFO_STREAM("DepthFilter: Start thread.");
-  thread_.reset(new std::thread(&DepthFilter::updateSeedsLoop, this));
-}
+// void DepthFilter::startThread()
+// {
+//   if(thread_)
+//   {
+//     SVO_ERROR_STREAM("DepthFilter: Thread already started!");
+//     return;
+//   }
+//   SVO_INFO_STREAM("DepthFilter: Start thread.");
+//   thread_.reset(new std::thread(&DepthFilter::updateSeedsLoop, this));
+// }
 
-void DepthFilter::stopThread()
-{
-  SVO_DEBUG_STREAM("DepthFilter: stop thread invoked.");
-  if(thread_ != nullptr)
-  {
-    SVO_DEBUG_STREAM("DepthFilter: interrupt and join thread... ");
-    quit_thread_ = true;
-    jobs_condvar_.notify_all();
-    thread_->join();
-    thread_.reset();
-  }
-}
+// void DepthFilter::stopThread()
+// {
+//   SVO_DEBUG_STREAM("DepthFilter: stop thread invoked.");
+//   if(thread_ != nullptr)
+//   {
+//     SVO_DEBUG_STREAM("DepthFilter: interrupt and join thread... ");
+//     quit_thread_ = true;
+//     jobs_condvar_.notify_all();
+//     thread_->join();
+//     thread_.reset();
+//   }
+// }
 
 void DepthFilter::addKeyframe(
     const FramePtr& frame,
@@ -99,9 +99,9 @@ void DepthFilter::addKeyframe(
            sec_feature_detector_->closeness_check_grid_.size() :
            0u));
 
-  if(thread_ == nullptr)
+  // if(thread_ == nullptr)
   {
-    ulock_t lock(feature_detector_mut_);
+    // ulock_t lock(feature_detector_mut_);
     depth_filter_utils::initializeSeeds(
           frame, feature_detector_, options_.max_n_seeds_per_frame,
           depth_min, depth_max, depth_mean);
@@ -122,87 +122,87 @@ void DepthFilter::addKeyframe(
             depth_min, depth_max, depth_mean);
     }
   }
-  else
-  {
-    ulock_t lock(jobs_mut_);
+  // else
+  // {
+  //   ulock_t lock(jobs_mut_);
 
-    // clear all other jobs, this one has priority
-    while(!jobs_.empty())
-      jobs_.pop();
-    jobs_.push(Job(frame, depth_min, depth_max, depth_mean));
-    jobs_condvar_.notify_all();
-  }
+  //   // clear all other jobs, this one has priority
+  //   while(!jobs_.empty())
+  //     jobs_.pop();
+  //   jobs_.push(Job(frame, depth_min, depth_max, depth_mean));
+  //   jobs_condvar_.notify_all();
+  // }
 }
 
 void DepthFilter::reset()
 {
-  ulock_t lock(jobs_mut_);
-  while(!jobs_.empty())
-    jobs_.pop();
+  // ulock_t lock(jobs_mut_);
+  // while(!jobs_.empty())
+  //   jobs_.pop();
   SVO_INFO_STREAM("DepthFilter: RESET.");
 }
 
-void DepthFilter::updateSeedsLoop()
-{
-  while(true)
-  {
-    // wait for new jobs
-    Job job;
-    {
-      ulock_t lock(jobs_mut_);
-      while(jobs_.empty() && !quit_thread_)
-        jobs_condvar_.wait(lock);
+// void DepthFilter::updateSeedsLoop()
+// {
+//   while(true)
+//   {
+//     // wait for new jobs
+//     Job job;
+//     {
+//       ulock_t lock(jobs_mut_);
+//       while(jobs_.empty() && !quit_thread_)
+//         jobs_condvar_.wait(lock);
 
-      if(quit_thread_)
-        return;
+//       if(quit_thread_)
+//         return;
 
-      job = jobs_.front();
-      jobs_.pop();
-    } // release lock
+//       job = jobs_.front();
+//       jobs_.pop();
+//     } // release lock
 
-    // process jobs
-    if(job.type == Job::SEED_INIT)
-    {
-      ulock_t lock(feature_detector_mut_);
-      depth_filter_utils::initializeSeeds(
-            job.cur_frame, feature_detector_,
-            options_.max_n_seeds_per_frame,
-            job.min_depth, job.max_depth, job.mean_depth);
-      if (options_.extra_map_points)
-      {
-        for (size_t idx = 0; idx < job.cur_frame->numFeatures(); idx++)
-        {
-          const FeatureType& type = job.cur_frame->type_vec_[idx];
-          if (!isMapPoint(type) && type != FeatureType::kOutlier)
-          {
-            sec_feature_detector_->closeness_check_grid_.fillWithKeypoints(
-                  job.cur_frame->px_vec_.col(static_cast<int>(idx)));
-          }
-        }
-        depth_filter_utils::initializeSeeds(
-              job.cur_frame, sec_feature_detector_,
-              options_.max_n_seeds_per_frame + options_.max_map_seeds_per_frame,
-              job.min_depth, job.max_depth, job.mean_depth);
-      }
-    }
-    else if(job.type == Job::UPDATE)
-    {
-      // We get higher precision (10x in the synthetic blender dataset)
-      // when we keep updating seeds even though they are converged until
-      // the frame handler selects a new keyframe.
-      depth_filter_utils::updateSeed(
-            *job.cur_frame, *job.ref_frame, job.ref_frame_seed_index, *matcher_,
-            options_.seed_convergence_sigma2_thresh, true, false);
-    }
-  }
-}
+//     // process jobs
+//     if(job.type == Job::SEED_INIT)
+//     {
+//       ulock_t lock(feature_detector_mut_);
+//       depth_filter_utils::initializeSeeds(
+//             job.cur_frame, feature_detector_,
+//             options_.max_n_seeds_per_frame,
+//             job.min_depth, job.max_depth, job.mean_depth);
+//       if (options_.extra_map_points)
+//       {
+//         for (size_t idx = 0; idx < job.cur_frame->numFeatures(); idx++)
+//         {
+//           const FeatureType& type = job.cur_frame->type_vec_[idx];
+//           if (!isMapPoint(type) && type != FeatureType::kOutlier)
+//           {
+//             sec_feature_detector_->closeness_check_grid_.fillWithKeypoints(
+//                   job.cur_frame->px_vec_.col(static_cast<int>(idx)));
+//           }
+//         }
+//         depth_filter_utils::initializeSeeds(
+//               job.cur_frame, sec_feature_detector_,
+//               options_.max_n_seeds_per_frame + options_.max_map_seeds_per_frame,
+//               job.min_depth, job.max_depth, job.mean_depth);
+//       }
+//     }
+//     else if(job.type == Job::UPDATE)
+//     {
+//       // We get higher precision (10x in the synthetic blender dataset)
+//       // when we keep updating seeds even though they are converged until
+//       // the frame handler selects a new keyframe.
+//       depth_filter_utils::updateSeed(
+//             *job.cur_frame, *job.ref_frame, job.ref_frame_seed_index, *matcher_,
+//             options_.seed_convergence_sigma2_thresh, true, false);
+//     }
+//   }
+// }
 
 size_t DepthFilter::updateSeeds(
     const std::vector<FramePtr>& ref_frames_with_seeds,
     const FramePtr& cur_frame)
 {
   size_t n_success = 0;
-  if(thread_ == nullptr)
+  // if(thread_ == nullptr)
   {
     for(const FramePtr& ref_frame : ref_frames_with_seeds)
     {
@@ -232,21 +232,21 @@ size_t DepthFilter::updateSeeds(
     SVO_DEBUG_STREAM("DepthFilter: " << cur_frame->cam()->getLabel() << " updated "
                      << n_success << " Seeds successfully.");
   }
-  else
-  {
-    ulock_t lock(jobs_mut_);
-    for(const FramePtr& ref_frame : ref_frames_with_seeds)
-    {
-      for(size_t i = 0; i < ref_frame->num_features_; ++i)
-      {
-        if(isSeed(ref_frame->type_vec_[i]))
-        {
-          jobs_.push(Job(cur_frame, ref_frame, i));
-        }
-      }
-    }
-    jobs_condvar_.notify_all();
-  }
+  // else
+  // {
+  //   ulock_t lock(jobs_mut_);
+  //   for(const FramePtr& ref_frame : ref_frames_with_seeds)
+  //   {
+  //     for(size_t i = 0; i < ref_frame->num_features_; ++i)
+  //     {
+  //       if(isSeed(ref_frame->type_vec_[i]))
+  //       {
+  //         jobs_.push(Job(cur_frame, ref_frame, i));
+  //       }
+  //     }
+  //   }
+  //   jobs_condvar_.notify_all();
+  // }
   return n_success;
 }
 
