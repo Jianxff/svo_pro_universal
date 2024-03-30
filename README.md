@@ -37,7 +37,7 @@ Then run the following commands:
 ```sh
 # clone the repo
 cd svo_pro_universal
-git branch wasm
+git checkout origin/wasm
 
 mkdir build
 cd build
