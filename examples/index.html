@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WorlTracking</title>
+</head>
+<body>
+    <h1>World Tracking for Web</h1>
+    <h5>Visual Odometry System from SVO 2.0</h5>
+    <div>
+        <button type="submit" id="permit">Permission</button>
+        <button type="submit" id="start" style="display: none;">Start</button>
+        <button type="submit" id="end" style="display: none;">Stop</button>
+    </div>
+    <div class="segline"></div>
+    <video id="video" autoplay playsinline style="width: 320px; height: 240px;"></video>
+    <div class="segline"></div>
+    <div id="three" style="width: 320px; height: 240px;"></div>
+</body>
+</html>
+
+<script type="module">
+import WorldTracking from "./worldtracking.js"
+import {THREE, Spacial} from "./js/render.js"
+
+// const sensor = await requestSensor();
+const Space = new Spacial({animation:true});
+var Tracker = null;
+var started = false;
+
+function onFrame() {
+    // update pose
+    const pose = Tracker.getViewPose().concat();
+    let Tdata = Spacial.formatTwcArray(pose.flat());
+    Space.updateCamera((camrea)=>{
+        camrea.position.copy(Tdata.t);
+        camrea.rotation.setFromRotationMatrix(Tdata.R);
+    }, 0);
+}
+
+function initScene(scene) {
+    // set scene
+    const ele = document.getElementById('three');
+    scene.bind(ele)
+    .resetSize(ele.offsetWidth, ele.offsetHeight)
+    .fitProjection();
+    // main camera
+    const cam1 = scene.addCamera();
+    const camhelper = new THREE.CameraHelper(scene.getCamera(cam1)) 
+    // grid and light
+    const grid = new THREE.GridHelper(10, 10, 0xcccccc);
+    const light = new THREE.DirectionalLight(0xFFFFFF, 3);
+    light.position.set(0, 10, 0);
+    light.target.position.set(-5, 0, 0);
+    // add to scene
+    scene.addObjects([light, light.target, grid, camhelper]);
+    // view camera
+    const cam2 = scene.addCamera();
+    scene.addOrbitControl(1)
+    .updateCamera((cam) => {
+        cam.position.set(0, 0.5, 1);
+        cam.lookAt(0,0,0);
+    }, cam2);
+    scene.switchView(cam2)
+    // set onframe loop
+    scene.setOnFrame(()=>{onFrame()}).start();
+}
+
+document.getElementById("permit").addEventListener("click", async () => {
+    Tracker = await WorldTracking.requestSession({width: 640,height: 480});
+    // set media stream
+    document.getElementById("video").srcObject = Tracker.getStream();
+    initScene(Space);
+    document.getElementById("permit").style.display = "none";
+    document.getElementById("start").style.display = "block";
+})
+
+document.getElementById("start").addEventListener("click", () => {
+    if(started) return;
+    console.log("=== Start Tracking ===")
+    Tracker.start();
+    started = true;
+    document.getElementById("start").style.display = "none";
+    document.getElementById("end").style.display = "block";
+});
+
+document.getElementById("end").addEventListener("click", () => {
+    if(!started) return;
+    console.log("=== Stop Tracking ===")
+    Tracker.end();
+    started = false;
+    document.getElementById("start").style.display = "block";
+    document.getElementById("end").style.display = "none";
+});
+
+</script>
+
+<style>
+body {
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: column;
+    align-items: center;
+}
+#video {
+    border: 1px solid gray;
+    border-radius: 20px;
+}
+#three {
+    border: 1px solid gray;
+    border-radius: 20px;
+}
+#permit {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 20px;
+    background-color: #2979FF;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+#start {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 20px;
+    background-color: #2979FF;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+#end {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 20px;
+    background-color: #FF3D00;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.segline {
+    margin-top: 20px;
+}
+</style>

@@ -7,15 +7,15 @@ cmake_policy(SET CMP0079 NEW)
 ## cxx standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_BUILD_TYPE "Release")
 
 ## cmake warnings
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msimd128 -Wno-unused-result -Wno-ignored-attributes")
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -msimd128 -Wno-unused-result -Wno-ignored-attributes")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result -Wno-ignored-attributes")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result -Wno-ignored-attributes")
 
 ## cmake optimize
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msimd128 -ffast-math")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msimd128 -ffast-math")
 
 ## emscripten settings
 set(COMPILE_FLAG_TEXT "-O3 -fexceptions")
@@ -25,25 +25,25 @@ set(LINK_FLAG_TEXT " \
     -s INITIAL_MEMORY=256MB \
     -s NO_DISABLE_EXCEPTION_CATCHING=1 \
     -s ERROR_ON_UNDEFINED_SYMBOLS=0 \
+    -s ALLOW_MEMORY_GROWTH=1 \
+    -s ALLOW_TABLE_GROWTH=1 \
     -s MODULARIZE=1 \
-    -s EXPORT_NAME=initWorldTrack \
+    -s EXPORT_NAME=initModule \
     -s SINGLE_FILE=1 \
     -s ENVIRONMENT=web,worker,shell \
     -s USE_PTHREADS=0 \
     -s SHARED_MEMORY=0 \
     -fexceptions \
-    -O3 --no-entry --no-check-features --bind"
+    -O3 --no-entry --no-check-features --bind \
+    --extern-post-js ${CMAKE_CURRENT_SOURCE_DIR}/src/svo_js/export.js"
 )
-
-# -s ALLOW_MEMORY_GROWTH=1 \
-# -s ALLOW_TABLE_GROWTH=1 \
 
 ## emscripten debug
 # debug on
-set(LINK_FLAG_TEXT "${LINK_FLAG_TEXT} -s ASSERTIONS=1")
+# set(LINK_FLAG_TEXT "${LINK_FLAG_TEXT} -s ASSERTIONS=0")
 # debug off
-# set(COMPILE_FLAG_TEXT "${COMPILE_FLAG_TEXT} -g0")
-# set(LINK_FLAG_TEXT "${LINK_FLAG_TEXT} -g0 -s ASSERTIONS=0")
+set(COMPILE_FLAG_TEXT "${COMPILE_FLAG_TEXT} -g0")
+set(LINK_FLAG_TEXT "${LINK_FLAG_TEXT} -g0 -s ASSERTIONS=0")
 
 ## ccache
 find_program(CCACHE_EXE ccache)
@@ -96,8 +96,7 @@ add_subdirectory(src)
 
 # add export
 add_custom_command(TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND echo "export default initWorldTrack;" >> ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.js
-  COMMAND cp ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.js ${PROJECT_SOURCE_DIR}/examples
-  VERBATIM
+    POST_BUILD
+    COMMAND cp ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.js ${PROJECT_SOURCE_DIR}/examples/js
+    VERBATIM
 )

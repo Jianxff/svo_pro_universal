@@ -1,30 +1,26 @@
-# svo_pro_universal
+# svo_pro_wasm
 
-This repo is the plain CMake version for [rpg_svo_pro_open](https://github.com/uzh-rpg/rpg_svo_pro_open). Check the original repo for detail.
+This branch is the **WebAssembly** version for [rpg_svo_pro_open](https://github.com/uzh-rpg/rpg_svo_pro_open). Check the original repo for detail.
 
 And now it supports:
-- mono/stereo visual-odometry
-- mono/stereo visual-intertial-odometry
+- mono visual-odometry
+- mono visual-intertial-odometry
 
-What is on working:
-- mono/stereo visual-intertial-SLAM
-- mono/stereo visual-intertial-SLAM with loop closure
+**No bundle-adjustment**.  
+**Single-Thread**.  
+**Still on working**.
 
-Ceres backend are not integrated into the system yet.
+For sturcture or sysetm details, check the `main` branch.
 
-The core codes for compile are in `src/` folder. 
-And the `extra/` folder includes the additional parts which are not integrated into current system.
-
+The wrapper codes for javascript are under `src/svo_js` folder.
 
 #### notes
-The main system APIs can be founded in `src/svo/svo_factory.h`
+The odometry system can work either on **WebWorker** or main-thread.
 
-EuRoC example can be found in `examples/`
+Check `src/svo_js/export.js` for importing and API calls.
 
-Pangolin is used for lightweight visualization. Codes for simple viewer are in `src/visualize`
-
-Type `GLOG_v=${level}` as command prefix to set glogv level.
-
+A simple example can be found under `examples/`
+  
 
 #### install
 Make sure you have installed:
@@ -32,37 +28,26 @@ Make sure you have installed:
 - Eigen 3.4.0
 - OpenGV
 - Ceres-Solver
-- Glog
-- yaml-cpp
-- pangolin
+
+And build them with [emscripten](https://emscripten.org/).
+
+And install them to the emsdk dir.
 
 Then run the following commands:
 ```sh
 # clone the repo
 cd svo_pro_universal
+git branch wasm
 
 mkdir build
 cd build
 
-cmake ..
-make -j4
-```
+# activate emsdk
+source /path/to/emsdk/emsdk_env.sh
 
-
-#### test on EuRoC
-test for monocular
-```sh
-cd build/examples
-GLOG_v=100 ./euroc_mono ../../examples/param/calib/euroc_mono.yaml ../../examples/param/pinhole.yaml ~/dataset/euroc/V101/mav0/
-```
-
-test for monocular-intertial
-```sh
-cd build/examples
-GLOG_v=100 ./euroc_mono_imu ../../examples/param/calib/euroc_mono.yaml ../../examples/param/pinhole_fixed.yaml ~/dataset/euroc/V101/mav0/
+emcmake cmake ..
+emmake make -j4
 ```
 
 #### preview
 ![preview-euroc](doc/preview.png)
-
-*\*The blue line is the poses estimated by frames (with imu prior) and the red line is the poses estimated by imu data*
