@@ -2,6 +2,8 @@
 
 This repo is the plain CMake version for [rpg_svo_pro_open](https://github.com/uzh-rpg/rpg_svo_pro_open). Check the original repo for detail.
 
+**Check branch [wasm](https://github.com/Jianxff/svo_pro_universal/tree/wasm) for WebAssembly version (odometry only).**
+
 And now it supports:
 - mono/stereo visual-odometry
 - mono/stereo visual-intertial-odometry
@@ -9,6 +11,9 @@ And now it supports:
 What is on working:
 - mono/stereo visual-intertial-SLAM
 - mono/stereo visual-intertial-SLAM with loop closure
+
+**No Bundle-Adjustment**.
+**Still on working**.
 
 Ceres backend are not integrated into the system yet.
 
