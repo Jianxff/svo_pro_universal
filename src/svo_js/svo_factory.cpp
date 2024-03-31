@@ -2,7 +2,6 @@
 
 #include "svo_factory.h"
 
-
 using namespace svo;
 
 const Eigen::Matrix4d CONVERT_MAT44D_FLIP_YZ = 
@@ -12,13 +11,25 @@ const Eigen::Matrix4d CONVERT_MAT44D_FLIP_YZ =
     0, 0, -1, 0,
     0, 0, 0, 1).finished();
 
+const Eigen::Matrix3d CONVERT_MAT33D_FLIP_YZ = 
+  (Eigen::Matrix3d() << 
+    1, 0, 0, 
+    0, -1, 0,
+    0, 0, -1).finished();
+
+template<typename T>
+T read_val(const emscripten::val value, const T default_val = T()) {
+    if(value == emscripten::val::undefined() || value == emscripten::val::null()) 
+        return default_val;
+    return value.as<T>();
+}
 
 template<typename T>
 Eigen::MatrixX<T> convert_emarray_matrix(const emscripten::val array, const int rows, const int cols) {
     Eigen::MatrixX<T> matrix(rows, cols);
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j < cols; j++) {
-            matrix(i, j) = array[i][j].as<T>();
+            matrix(i, j) = read_val<T>(array[i][j]);
         }
     }
     return matrix;
@@ -26,9 +37,11 @@ Eigen::MatrixX<T> convert_emarray_matrix(const emscripten::val array, const int 
 
 template<typename T>
 Eigen::VectorX<T> convert_emarray_vector(const emscripten::val array, const int size) {
+    if(array == emscripten::val::undefined() || array == emscripten::val::null())
+        return Eigen::VectorX<T>::Zero(size);
     Eigen::VectorX<T> vector(size);
     for(int i = 0; i < size; i++) {
-        vector(i) = array[i].as<T>();
+        vector(i) = read_val<T>(array[i]);
     }
     return vector;
 }
@@ -45,10 +58,12 @@ emscripten::val convert_eigen_emarray(const Eigen::MatrixX<T> matrix) {
     return array;
 }
 
-template<typename T>
-T read_val(const emscripten::val value, const T default_val = T()) {
-    if(value == emscripten::val::undefined()) return default_val;
-    return value.as<T>();
+
+
+const emscripten::val read_muli(const emscripten::val value, std::vector<emscripten::val>& vec) {
+    if(value == emscripten::val::undefined()) return emscripten::val::undefined();
+    vec.push_back(value);
+    return emscripten::val::undefined();
 }
 
 std::map<svo::Stage, int> stage2int = {
@@ -87,7 +102,7 @@ std::shared_ptr<CameraBundle> makeCamera(
     );
 
     Eigen::Matrix4d T_B_C_raw = Eigen::Matrix4d::Identity();
-    if(calib["T_B_C"] != emscripten::val::undefined()) 
+    if(calib["T_B_C"] != emscripten::val::undefined() && calib["T_B_C"] != emscripten::val::null()) 
         T_B_C_raw = convert_emarray_matrix<double>(calib["T_B_C"], 4, 4);
     vk::cameras::Quaternion q_B_C = vk::cameras::Quaternion(
           static_cast<Eigen::Matrix3d>(T_B_C_raw.block<3,3>(0,0)));
@@ -141,40 +156,29 @@ std::shared_ptr<ImuHandler> makeIMU(
 
 ImuCalibration loadImuCalibration(const emscripten::val data){
     ImuCalibration calib;
-    calib.delay_imu_cam = read_val<double>(data["imu_params"]["delay_imu_cam"]);
-    calib.max_imu_delta_t = read_val<double>(data["imu_params"]["max_imu_delta_t"]);
-    calib.saturation_accel_max = read_val<double>(data["imu_params"]["acc_max"]);
-    calib.saturation_omega_max = read_val<double>(data["imu_params"]["omega_max"]);
-    calib.gyro_noise_density = read_val<double>(data["imu_params"]["sigma_omega_c"]);
-    calib.acc_noise_density = read_val<double>(data["imu_params"]["sigma_acc_c"]);
-    calib.gyro_bias_random_walk_sigma = read_val<double>(data["imu_params"]["sigma_omega_bias_c"]);
-    calib.acc_bias_random_walk_sigma = read_val<double>(data["imu_params"]["sigma_acc_bias_c"]);
-    calib.gravity_magnitude = read_val<double>(data["imu_params"]["g"]);
-    calib.imu_rate = read_val<double>(data["imu_params"]["imu_rate"]);
+    calib.delay_imu_cam = read_val<double>(data["imu_delay_imu_cam"], 0.0);
+    calib.max_imu_delta_t = read_val<double>(data["imu_max_imu_delta_t"], 0.01);
+    calib.saturation_accel_max = read_val<double>(data["imu_acc_max"], 150);
+    calib.saturation_omega_max = read_val<double>(data["imu_omega_max"], 7.8);
+    calib.gyro_noise_density = read_val<double>(data["imu_sigma_omega_c"], 0.00073088444);
+    calib.acc_noise_density = read_val<double>(data["imu_sigma_acc_c"], 0.01883649);
+    calib.gyro_bias_random_walk_sigma = read_val<double>(data["imu_sigma_omega_bias_c"], 0.00038765);
+    calib.acc_bias_random_walk_sigma = read_val<double>(data["imu_sigma_acc_bias_c"], 0.012589254);
+    calib.gravity_magnitude = read_val<double>(data["imu_g"], 9.8);
+    calib.imu_rate = read_val<double>(data["imu_rate"], 20);
     return calib;
 }
 
 
 ImuInitialization loadImuInitialization(const emscripten::val data){
     ImuInitialization init;
-    init.velocity = Eigen::Vector3d(
-        read_val<double>(data["imu_initialization"]["velocity"][0]),
-        read_val<double>(data["imu_initialization"]["velocity"][1]),
-        read_val<double>(data["imu_initialization"]["velocity"][2])
-    );
-    init.omega_bias = Eigen::Vector3d(
-        read_val<double>(data["imu_initialization"]["omega_bias"][0]),
-        read_val<double>(data["imu_initialization"]["omega_bias"][1]),
-        read_val<double>(data["imu_initialization"]["omega_bias"][2])
-    );
-    init.acc_bias = Eigen::Vector3d(
-        read_val<double>(data["imu_initialization"]["acc_bias"][0]),
-        read_val<double>(data["imu_initialization"]["acc_bias"][1]),
-        read_val<double>(data["imu_initialization"]["acc_bias"][2])
-    );
-    init.velocity_sigma = read_val<double>(data["imu_initialization"]["velocity_sigma"]);
-    init.omega_bias_sigma = read_val<double>(data["imu_initialization"]["omega_bias_sigma"]);
-    init.acc_bias_sigma = read_val<double>(data["imu_initialization"]["acc_bias_sigma"]);
+    init.velocity = convert_emarray_vector<double>(data["imu_velocity"], 3);
+    init.omega_bias = convert_emarray_vector<double>(data["imu_omega_bias"], 3);
+    init.acc_bias = convert_emarray_vector<double>(data["imu_acc_bias"], 3);
+    
+    init.velocity_sigma = read_val<double>(data["imu_velocity_sigma"], 2.0);
+    init.omega_bias_sigma = read_val<double>(data["imu_omega_bias_sigma"], 0.01);
+    init.acc_bias_sigma = read_val<double>(data["imu_acc_bias_sigma"], 0.1);
     return init;
 }
 
@@ -326,8 +330,7 @@ DepthFilterOptions loadDepthFilterOptions(const emscripten::val node) {
         read_val<bool>(node["depth_filter_extra_map_points"], false);
     if(read_val<bool>(node["runlc"], false) && !o.extra_map_points)
     {
-        LOG(WARNING) << "Loop closure requires extra map points, "
-                    << " but the option is not set, overriding to true.";
+        SVO_WARN_STREAM("Loop closure requires extra map points, but the option is not set, overriding to true.");
         o.extra_map_points = true;
     }
 
@@ -415,6 +418,37 @@ emscripten::val Odometry::world_viewpose_gl() const{
     return matrix;
 }
 
+emscripten::val Odometry::local_map() const{
+    auto last_frame = frame_handler_->getLastFrames();
+    if(!last_frame || last_frame->size() == 0) 
+        return emscripten::val::array();
+    
+    auto close_kfs = frame_handler_->closeKeyframes();
+    auto map = frame_handler_->map();
+    // em array
+    emscripten::val map_data = emscripten::val::array();
+    // get frames
+    std::vector<FramePtr> viz_frames = close_kfs;
+    std::vector<Eigen::Vector3d> region_lm_;
+    viz_frames.push_back(last_frame->at(0));
+    // iterate
+    for(const auto& vf : viz_frames) {
+        auto p_lm_vec_ = &(vf->landmark_vec_);
+        for(size_t i = 0; i < vf->num_features_; ++i) {
+            PointPtr p_lm = p_lm_vec_->at(i);
+            if(p_lm == nullptr)
+                continue;
+            Eigen::Vector3d pos = CONVERT_MAT33D_FLIP_YZ * p_lm->pos();
+            emscripten::val point = emscripten::val::array();
+            point.set(0, pos.x());
+            point.set(1, pos.y());
+            point.set(2, pos.z());
+            map_data.call<void>("push", point);
+        }
+    }
+    return map_data;
+}
+
 void Odometry::start() const {
     frame_handler_->start();
 }
@@ -490,13 +524,10 @@ void Odometry::addImuMeasurement(
     const emscripten::val acc_array
 ) const {
     if(imu_handler_ == nullptr) return;
-    if(gyro_array[0] == emscripten::val::null() || acc_array[0] == emscripten::val::null()) 
-        return;
     ///
     const uint64_t timestamp_u64 = static_cast<uint64_t>(timestamp.as<double>());
-    Eigen::Vector3d gyro, acc;
-    gyro << gyro_array[0].as<double>(), gyro_array[1].as<double>(), gyro_array[2].as<double>();
-    acc << acc_array[0].as<double>(), acc_array[1].as<double>(), acc_array[2].as<double>();
+    Eigen::Vector3d gyro = convert_emarray_vector<double>(gyro_array, 3);
+    Eigen::Vector3d acc = convert_emarray_vector<double>(acc_array, 3);
     const ImuMeasurement m(
         (double)timestamp_u64 * common::conversions::kNanoSecondsToSeconds,
         gyro,
@@ -531,5 +562,6 @@ EMSCRIPTEN_BINDINGS(svojs)
         .function("addFrame", &Odometry::addImageBundle, emscripten::allow_raw_pointers())
         .function("addMotion", &Odometry::addImuMeasurement, emscripten::allow_raw_pointers())
         .function("getGLPose", &Odometry::world_pose_gl)
-        .function("getViewPose", &Odometry::world_viewpose_gl);
+        .function("getViewPose", &Odometry::world_viewpose_gl)
+        .function("getLocalMap", &Odometry::local_map);
 }

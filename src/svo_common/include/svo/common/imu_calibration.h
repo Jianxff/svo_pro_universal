@@ -54,7 +54,7 @@ public:
   double imu_rate = 20;
 
   /// Load form YAML File
-  static Ptr loadFromYaml(const std::string& filename);
+  // static Ptr loadFromYaml(const std::string& filename);
 
   ImuCalibration() = default;
   ~ImuCalibration() = default;

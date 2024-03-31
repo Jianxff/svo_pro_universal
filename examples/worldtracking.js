@@ -5,7 +5,7 @@ var sensor = null;
 const Session = {
     inited_: false,
     started_: false,
-    use_imu_: false,
+    settings_: {},
     viewPose_: [
         [1, 0, 0, 0],
         [0, 1, 0, 0],
@@ -14,11 +14,11 @@ const Session = {
     ],
     imu_loop_id_: null,
     frame_loop_id_: null,
-    start: function(fps=30, imuHz=200) {
+    start: function(fps=30, imuHz=60) {
         if(!this.inited_) return;
         if(this.started_) return;
 
-        if(this.use_imu_) {
+        if(this.settings_.use_imu) {
             this.imu_loop_id_ = setInterval(() => {
                 var imudata = sensor.getMotion(true);
                 imudata.name = "addMotion";
@@ -26,12 +26,19 @@ const Session = {
             }, 1000 / imuHz);
         }
         
-        this.frame_loop_id = setInterval(async () => {
+        this.frame_loop_id_ = setInterval(async () => {
             // worker.postMessage({name:'getViewPose'})
             try{
-                let res = await sensor.getFrameBitmap();
-                res.name = 'addFrameBitmap'
-                worker.postMessage(res, [res.data])
+                if(this.settings_.use_bitmap) {
+                    let res = await sensor.getFrameBitmap();
+                    res.name = 'addFrameBitmap'
+                    worker.postMessage(res, [res.data]);
+                }
+                else{
+                    let res = await sensor.getFrame();
+                    res.name = 'addFrame'
+                    worker.postMessage(res, [res.data.data.buffer])
+                }
             }catch(err) { 
                 // ignore 
             }
@@ -40,10 +47,9 @@ const Session = {
         this.started_ = true;
     },
     end: function() {
-        if(!this.started_) return;
-        worker.postMessage({name: "reset"});
         clearInterval(this.imu_loop_id_);
         clearInterval(this.frame_loop_id_);
+        worker.postMessage({name: "reset"});
     },
     getViewPose: function() {
         return this.viewPose_;
@@ -85,6 +91,7 @@ async function requestSession(settings={}) {
         // merge settings
         let default_settings = {
             use_imu: false,
+            use_bitmap: (typeof ImageCapture !== 'undefined'),
             width: 640,
             height: 480    
         }
@@ -92,7 +99,7 @@ async function requestSession(settings={}) {
             default_settings[key] = settings[key];
         }
         // initialize
-        Session.use_imu_ = default_settings.use_imu;
+        Session.settings_ = default_settings;
         worker.postMessage({
             name: "init",
             data: default_settings
@@ -103,6 +110,7 @@ async function requestSession(settings={}) {
             looptime += 1000;
             if(Session.inited_) {
                 clearInterval(loopid);
+                console.log(Session);
                 resolve(Session);
             } else if(looptime >= 6000) {
                 clearInterval(loopid);

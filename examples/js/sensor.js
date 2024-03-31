@@ -20,18 +20,18 @@ class Sensor{
 
     async getFrame() {
         try{
-            var bitmap;
-            if(self.imageCapture) {
-                bitmap = await this.imageCapture.grabFrame();
+            var source;
+            if(this.imageCapture) {
+                source = await this.imageCapture.grabFrame();
             } else {
-                bitmap = this.video_el;
+                source = this.video_el;
             }
             if(!this.context) {
-                this.context = new OffscreenCanvas(bitmap.width, bitmap.height).getContext('2d', { willReadFrequently: true });
+                this.context = new OffscreenCanvas(source.width, source.height).getContext('2d', { willReadFrequently: true });
             }
-            context.drawImage(bitmap, 0, 0);
+            this.context.drawImage(source, 0, 0);
             return {
-                data: context.getImageData(0, 0, bitmap.width, bitmap.height).data,
+                data: this.context.getImageData(0, 0, source.width, source.height), // ImageData
                 timestamp: Date.now()
             }
         }catch(err){
@@ -42,10 +42,12 @@ class Sensor{
 
     async getFrameBitmap() {
         var bitmap;
-        if(self.imageCapture) {
+        if(this.imageCapture) {
             bitmap = await this.imageCapture.grabFrame();
         } else {
-            bitmap = this.video_el;
+            console.error('Transfer of bitmap is not supported.')
+            alert('Transfer of bitmap is not supported.')
+            return undefined
         }
         return {
             data: bitmap,
@@ -77,18 +79,18 @@ const __SENSOR__ = new Sensor();
 async function requestMotion() {
     return new Promise((resolve, reject) => {
         const assert = () => {
-            if(DeviceMotionEvent === undefined) {
+            if(window.DeviceMotionEvent === undefined) {
                 reject(new Error("DeviceMotion is not supported."));
                 return;
             }
-            if(DeviceOrientationEvent === undefined) {
+            if(window.DeviceOrientationEvent === undefined) {
                 reject(new Error("DeviceOrientation is not supported."));
                 return;
             }
             resolve();
         }
 
-        if(DeviceMotionEvent.requestPermission !== undefined) {
+        if(window.DeviceMotionEvent.requestPermission !== undefined) {
             DeviceMotionEvent.requestPermission()
             .then(state => {
                 if(state === "granted") assert();
@@ -115,9 +117,16 @@ async function requestSensor(constraint=undefined) {
             .then(stream => { 
                 __SENSOR__.stream = stream; 
                 __SENSOR__.track = stream.getTracks()[0];
-                if(typeof ImageCapture === 'undefined') {
-                    __SENSOR__.video_el = document.createElement('__video_element_for_imacap__');
-                    __SENSOR__.video_el.srcObject = stream;
+                if(typeof ImageCapture !== 'function') {
+                    console.warn('ImageCapture is not supported.')
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.setAttribute( 'autoplay', 'autoplay' );
+                    video.setAttribute( 'playsinline', 'playsinline' );
+                    video.setAttribute( 'webkit-playsinline', 'webkit-playsinline' );
+                    video.width = constraint.video.width;
+                    video.height = constraint.video.height;
+                    __SENSOR__.video_el = video;
                 } else {
                     __SENSOR__.imageCapture = new ImageCapture(__SENSOR__.track);
                 }

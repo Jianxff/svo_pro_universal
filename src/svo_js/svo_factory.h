@@ -24,7 +24,6 @@
 
 #include <opencv2/opencv.hpp>
 
-
 /// Options Loading
 svo::BaseOptions 
     loadBaseOptions(const emscripten::val json);
@@ -100,6 +99,8 @@ public:
     const Eigen::Matrix4d transform_world_cam() const;
     emscripten::val world_pose_gl() const;
     emscripten::val world_viewpose_gl() const;
+
+    emscripten::val local_map() const;
 
     void addImageBundle(
         const emscripten::val timestamp,

@@ -17,12 +17,17 @@ const svo_config = {
     reprojector_affine_est_gain: true,
     init_min_disparity: 30,
     quality_min_fts: 40,
-    quality_max_drop_fts: 80
+    quality_max_drop_fts: 80,
+    use_imu: false
 }
 
 const calib = {
     width: 640,
-    height: 480
+    height: 480,
+    use_imu: false,
+    imu_rate: 60,
+    imu_g: 9.8,
+    T_B_C: [[1,0,0,0],[0,-1,0,0],[0,0,-1,0],[0,0,0,1]]
 }
 
 let Module_, Odometry_, Frame_, Context_;
@@ -33,6 +38,7 @@ async function initialize(onworker, settings={}) {
     onWorker_ = onworker;
     for(const key in settings) {
         calib[key] = settings[key];
+        svo_config[key] = settings[key];
     }
     // init loading
     return new Promise(async (resolve, reject) => {
@@ -64,7 +70,8 @@ function addFrameBitmap(data) {
 
 function addFrame(data) {
     const timestamp = data.timestamp;
-    Frame_.data.set(data.data);
+    const ImageData = data.data;
+    Frame_.data.set(ImageData.data);
     Odometry_.addFrame(timestamp, Frame_);
     return getViewPose();
 }
@@ -89,6 +96,12 @@ function getState() {
     return state;
 }
 
+function getLocalMap() {
+    const mapdata = Odometry_.getLocalMap();
+    if(onWorker_) postMessage({name: "setLoacalMap", data: mapdata});
+    return mapdata
+}
+
 function reset() {
     Odometry_.reset();
 }
@@ -101,6 +114,7 @@ onmessage = e => {
         case "addMotion": addMotion(e.data); break;
         case "getViewPose": getViewPose(); break;
         case "getState": getState(); break;
+        case "getLocalmap": getLocalMap(); break;
         case "reset": reset(); break;
     }
 }
@@ -112,6 +126,7 @@ export default {
     addFrame,
     addMotion,
     getViewPose,
+    getLocalMap,
     getState,
     reset
 }

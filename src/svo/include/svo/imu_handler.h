@@ -159,17 +159,17 @@ public:
 
   bool addImuMeasurement(const ImuMeasurement& measurement);
 
-  bool loadImuMeasurementsFromFile(const std::string& filename);
+  // bool loadImuMeasurementsFromFile(const std::string& filename);
 
-  bool loadImuMeasurementsFromCsvFile(const std::string& filename);
+  // bool loadImuMeasurementsFromCsvFile(const std::string& filename);
 
   static Eigen::Matrix3d integrateGyroMeasurement(
       const Eigen::Vector3d& omega_measured,
       const Eigen::Matrix3d& R_cam_imu,
       const double delta_t);
 
-  static ImuCalibration loadCalibrationFromFile(const std::string& filename);
-  static ImuInitialization loadInitializationFromFile(const std::string& filename);
+  // static ImuCalibration loadCalibrationFromFile(const std::string& filename);
+  // static ImuInitialization loadInitializationFromFile(const std::string& filename);
 
   void reset();
 

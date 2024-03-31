@@ -106,7 +106,7 @@ bool ImuHandler::getMeasurementsContainingEdges(
   ulock_t lock(measurements_mut_);
   if(measurements_.empty())
   {
-    LOG(WARNING) << "don't have any imu measurements!";
+    // LOG(WARNING) << "don't have any imu measurements!";
     return false;
   }
 
@@ -122,7 +122,7 @@ bool ImuHandler::getMeasurementsContainingEdges(
     {
       if(it == measurements_.begin())
       {
-        LOG(WARNING) << "need a newer measurement for interpolation!";
+        // LOG(WARNING) << "need a newer measurement for interpolation!";
         return false;
       }
       //decrement iterator again to point to element >= t
@@ -138,7 +138,7 @@ bool ImuHandler::getMeasurementsContainingEdges(
   // check
   if(extracted_measurements.size()<2)
   {
-    LOG(WARNING) << "need older imu measurements!";
+    // LOG(WARNING) << "need older imu measurements!";
     extracted_measurements.clear();
     return false;
   }
@@ -164,7 +164,7 @@ bool ImuHandler::getMeasurements(
   ulock_t lock(measurements_mut_);
   if(measurements_.empty())
   {
-    LOG(WARNING) << "don't have any imu measurements!";
+    // LOG(WARNING) << "don't have any imu measurements!";
     return false;
   }
 
@@ -196,26 +196,26 @@ bool ImuHandler::getMeasurements(
   // check
   if(it1 == measurements_.end())
   {
-    LOG(WARNING) << "need an older measurement for t1!";
-    return false;
+    // LOG(WARNING) << "need an older measurement for t1!";
+    // return false;
   }
 
   if(it2 == measurements_.end())
   {
-    LOG(WARNING) << "need an older measurement for t2!";
-    return false;
+    // LOG(WARNING) << "need an older measurement for t2!";
+    // return false;
   }
 
   if(it1 == it2)
   {
-    LOG(WARNING) << "not enough imu measurements!";
-    return false;
+    // LOG(WARNING) << "not enough imu measurements!";
+    // return false;
   }
 
   if(t2-it2->timestamp_ > imu_calib_.max_imu_delta_t)
   {
-    LOG(WARNING) << "newest imu measurement is too old for the image "
-                    << t2-it2->timestamp_;
+    // LOG(WARNING) << "newest imu measurement is too old for the image "
+    //                 << t2-it2->timestamp_;
     return false;
   }
 
@@ -242,7 +242,7 @@ bool ImuHandler::getClosestMeasurement(
   ulock_t lock(measurements_mut_);
   if(measurements_.empty())
   {
-    LOG(WARNING) << "ImuHandler: don't have any imu measurements!";
+    // LOG(WARNING) << "ImuHandler: don't have any imu measurements!";
     return false;
   }
 
@@ -260,8 +260,8 @@ bool ImuHandler::getClosestMeasurement(
 
   if(dt_best > imu_calib_.max_imu_delta_t)
   {
-    LOG(WARNING) << "ImuHandler: getClosestMeasurement: no measurement found!"
-                    " closest measurement: " << dt_best*1000.0 << "ms.";
+    // LOG(WARNING) << "ImuHandler: getClosestMeasurement: no measurement found!"
+    //                 " closest measurement: " << dt_best*1000.0 << "ms.";
     return false;
   }
   return true;
@@ -462,7 +462,7 @@ bool ImuHandler::getInitialAttitude(
   ImuMeasurement m;
   if(!getClosestMeasurement(timestamp, m))
   {
-    LOG(WARNING) << "ImuHandler: Could not get initial attitude. No measurements!";
+    // LOG(WARNING) << "ImuHandler: Could not get initial attitude. No measurements!";
     return false;
   }
 
@@ -502,7 +502,7 @@ IMUTemporalStatus ImuHandler::checkTemporalStatus(const double time_sec)
   if (!options_.temporal_stationary_check)
   {
     // CHECK_EQ(temporal_imu_window_.size(), 0u);
-    LOG(WARNING) << "Stationary check is not enabled. Will assume moving.";
+    // LOG(WARNING) << "Stationary check is not enabled. Will assume moving.";
     return res;
   }
 
@@ -594,7 +594,7 @@ bool ImuHandler::waitTill(const double img_timestamp_sec,
   {
     if (wait_time.stop() > timeout_sec)
     {
-      LOG(ERROR) << "Did not get IMU measurements";
+      // LOG(ERROR) << "Did not get IMU measurements";
       return false;
     }
     wait_time.resume();
