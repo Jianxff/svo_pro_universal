@@ -28,8 +28,8 @@ public:
     };
 
     Video(const std::string& video_path) {
-        _assert_filepath_(video_path_);
         video_path_ = fs::canonical(fs::absolute(video_path));
+        _assert_filepath_(video_path_);
         //
         cap_ = cv::VideoCapture(video_path_.string());
         if(!cap_.isOpened()) {
