@@ -548,7 +548,7 @@ EMSCRIPTEN_BINDINGS(svojs)
 
     emscripten::class_<FrameRGBA>("Frame")
         .constructor<int, int>()
-        .property("data", &FrameRGBA::matData, emscripten::allow_raw_pointers());
+        .property("data", &FrameRGBA::matData);
 
     emscripten::class_<Odometry>("Instance")
         .constructor<emscripten::val, emscripten::val>()
