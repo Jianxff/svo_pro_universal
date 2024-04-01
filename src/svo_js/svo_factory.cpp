@@ -548,7 +548,7 @@ EMSCRIPTEN_BINDINGS(svojs)
 
     emscripten::class_<FrameRGBA>("Frame")
         .constructor<int, int>()
-        .property("data", &FrameRGBA::matData);
+        .property("data", &FrameRGBA::matData, emscripten::allow_raw_pointers());
 
     emscripten::class_<Odometry>("Instance")
         .constructor<emscripten::val, emscripten::val>()
@@ -560,7 +560,7 @@ EMSCRIPTEN_BINDINGS(svojs)
         .function("start", &Odometry::start)
         .function("reset", &Odometry::reset)
         .function("addFrame", &Odometry::addImageBundle, emscripten::allow_raw_pointers())
-        .function("addMotion", &Odometry::addImuMeasurement, emscripten::allow_raw_pointers())
+        .function("addMotion", &Odometry::addImuMeasurement)
         .function("getGLPose", &Odometry::world_pose_gl)
         .function("getViewPose", &Odometry::world_viewpose_gl)
         .function("getLocalMap", &Odometry::local_map);
