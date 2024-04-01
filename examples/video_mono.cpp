@@ -40,13 +40,16 @@ int main(int argc, char* argv[]) {
         if(!data.valid()) {
             break;
         }
+        cv::imshow("inputframe", data.cam);
         vo.addImageBundle({data.cam}, data.ts);
 
         if(vo.stage() == svo::Stage::kPaused) {
             cv::waitKey(0);
+            svo_viewer_->reset();
             vo.start();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        // cv::waitKey(0);
     }
 
     cv::waitKey(0);

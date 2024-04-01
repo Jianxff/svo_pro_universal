@@ -20,6 +20,7 @@ public:
     void exit();
 
     void update_vo();
+    void reset();
 
     void drawCamera();
     void drawMapRegion();
@@ -36,7 +37,7 @@ private:
     std::vector<Eigen::Vector3d> traj_cam_;
     std::vector<Eigen::Vector3d> traj_imu_;
     std::vector<Eigen::Vector3d> region_lm_;
-    // std::shared_ptr<std::vector<
+    std::vector<Eigen::Vector3d> global_lm_;
 
     std::atomic<bool> sig_exit_ = false;
 

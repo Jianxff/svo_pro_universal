@@ -94,36 +94,43 @@ void Viewer::drawCamera() {
 }
 
 void Viewer::drawMapRegion() {
+    glPointSize(1);
+    glBegin(GL_POINTS);
+    for(const auto& lm : global_lm_) {
+        glColor3f(0.0,0.0,1.0);
+        float x = lm(0), y = lm(1), z = lm(2);
+        glVertex3f(x, y, z);
+    }
+    glEnd();
+
     if(region_lm_.empty())
         return;
     glPointSize(4);
     glBegin(GL_POINTS);
-    
     for(const auto& lm : region_lm_) {
         glColor3f(0.0,1.0,0.0);
         float x = lm(0), y = lm(1), z = lm(2);
         glVertex3f(x, y, z);
     }
-
     glEnd();
 }
 
 
 void Viewer::drawTrajectory() {
-    glLineWidth(2);
+    glLineWidth(3);
     glBegin(GL_LINE_STRIP);
     for(const auto& pos : traj_cam_) {
-        glColor3f(0.0,0.0,1.0);
-        glVertex3d(pos(0), pos(1), pos(2));
-    }
-    glEnd();
-
-    glBegin(GL_LINE_STRIP);
-    for(const auto& pos : traj_imu_) {
         glColor3f(1.0,0.0,0.0);
         glVertex3d(pos(0), pos(1), pos(2));
     }
     glEnd();
+
+    // glBegin(GL_LINE_STRIP);
+    // for(const auto& pos : traj_imu_) {
+    //     glColor3f(1.0,0.0,0.0);
+    //     glVertex3d(pos(0), pos(1), pos(2));
+    // }
+    // glEnd();
 
 }
 
@@ -177,6 +184,7 @@ void Viewer::update_vo_tracking_() {
                 continue;
             Eigen::Vector3d pos = p_lm->pos();
             region_lm_.push_back(pos);
+            // global_lm_.push_back(pos);
         }
     }
 
@@ -219,6 +227,13 @@ void Viewer::update_vo_initializing_() {
         cv::imshow("svo_pro_frame", img);
         cv::waitKey(5);        
     }
+}
+
+void Viewer::reset() {
+    traj_cam_.clear();
+    traj_imu_.clear();
+    region_lm_.clear();
+    global_lm_.clear();
 }
 
 void Viewer::update_frame_() {
