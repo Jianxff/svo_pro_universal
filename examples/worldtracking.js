@@ -50,6 +50,7 @@ const Session = {
         clearInterval(this.imu_loop_id_);
         clearInterval(this.frame_loop_id_);
         worker.postMessage({name: "reset"});
+        this.started_ = false;
     },
     getViewPose: function() {
         return this.viewPose_;

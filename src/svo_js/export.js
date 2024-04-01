@@ -27,7 +27,7 @@ const calib = {
     use_imu: false,
     imu_rate: 60,
     imu_g: 9.8,
-    T_B_C: [[1,0,0,0],[0,-1,0,0],[0,0,-1,0],[0,0,0,1]]
+    T_B_C: [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]
 }
 
 let Module_, Odometry_, Frame_, Context_;

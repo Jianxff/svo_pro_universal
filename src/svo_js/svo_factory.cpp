@@ -384,7 +384,7 @@ Odometry::Odometry(
 
     // SVO_INFO_STREAM("Initializing SVO with " << imwidth_ << "x" << imheight_ << " resolution.");
 
-    const bool use_imu = read_val<bool>(calib["use_imu"], false);
+    const bool use_imu = read_val<bool>(config["use_imu"], false);
 
     auto camera = makeCamera(calib);
     frame_handler_ = makeMono(camera, config);
@@ -507,13 +507,15 @@ void Odometry::addImageBundle(
     const uint64_t timestamp_u64 = static_cast<uint64_t>(timestamp.as<double>());
     if(!_set_imu_prior(timestamp_u64)){
         // VLOG(3) << "Could not align gravity! Attempting again in next iteration.";
+        SVO_ERROR_STREAM("Could not align gravity! Attempting again in next iteration.");
         return;
     }
-    cv::Mat rgb;
-    cv::cvtColor(frame.mat().clone(), rgb, cv::COLOR_RGBA2BGR);
+    cv::Mat rgb = frame.mat().clone();
+    cv::cvtColor(rgb, rgb, cv::COLOR_RGBA2BGR);
     frame_handler_->addImageBundle({rgb}, timestamp_u64);
     // check stage
     if(auto_reset_ && stage() == stage2int[Stage::kPaused]) {
+        SVO_ERROR_STREAM("RESET");
         reset();
     }
 }

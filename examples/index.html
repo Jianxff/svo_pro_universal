@@ -12,9 +12,9 @@
         <button type="submit" id="end" style="display: none;">Stop</button>
     </div>
     <div class="segline"></div>
-    <video id="video" autoplay playsinline style="width: 240px; height: 320px;"></video>
+    <video id="video" autoplay playsinline style="width: 320px; height: 320px;"></video>
     <div class="segline"></div>
-    <div id="three" style="width: 240px; height: 320px;"></div>
+    <div id="three" style="width: 320px; height: 320px;"></div>
 </body>
 </html>
 
@@ -67,8 +67,8 @@ function initScene(scene) {
 
 document.getElementById("permit").addEventListener("click", async () => {
     Tracker = await WorldTracking.requestSession({
-        width: 480,
-        height: 640, 
+        width: 640,
+        height: 480, 
         use_imu: false
     });
     // set media stream
