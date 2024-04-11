@@ -6,11 +6,11 @@ This repo is the plain CMake version for [rpg_svo_pro_open](https://github.com/u
 
 And now it supports:
 - mono/stereo visual-odometry
-- mono/stereo visual-intertial-odometry
+- mono/stereo visual-inertial-odometry
 
 What is on working:
-- mono/stereo visual-intertial-SLAM
-- mono/stereo visual-intertial-SLAM with loop closure
+- mono/stereo visual-inertial-SLAM
+- mono/stereo visual-inertial-SLAM with loop closure
 
 **No Bundle-Adjustment**.
 **Still on working**.
